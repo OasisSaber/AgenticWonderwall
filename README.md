@@ -20,11 +20,35 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 
 ## 快速开始
 
-1. 使用 GitHub Template Repository 创建新仓库，或只复制 `AGENTS.md`。
-2. 在 `AGENTS.md` 的“项目事实”中填写项目目标、技术栈、验证命令和默认分支。
-3. 按项目需要替换验证脚本和持续集成配置。
-4. 复杂任务使用 GitHub Issue 记录边界；小型低风险任务使用当前会话中的明确人类授权。
-5. 使用一个 jj change 完成实现、验证与 Agent 自审，通过 Pull Request 交给人类决定是否 Squash Merge。
+1. 使用 GitHub Template Repository 创建新仓库，或只复制 `AGENTS.md`。模板只复制仓库文件，不会复制本地 `.jj` 状态。
+2. 在本地初始化 Jujutsu 工作区；二选一：
+
+   ```bash
+   # 路径 A：直接使用 Jujutsu 克隆
+   jj git clone <repository-url>
+   cd <repository>
+   ```
+
+   ```bash
+   # 路径 B：仓库已通过 Git 克隆
+   git clone <repository-url>
+   cd <repository>
+   jj git init --colocate
+   ```
+
+   初始化后运行：
+
+   ```bash
+   jj status
+   jj git remote list
+   jj log -r 'main | main@origin' -n 5
+   ```
+
+3. 在 `AGENTS.md` 的“项目事实”中填写项目目标、技术栈、验证命令和默认分支。
+4. 按项目需要替换验证脚本和持续集成配置，并按 [仓库设置说明](docs/repository-settings.md) 由人类配置 GitHub 保护规则。
+5. 开始新任务前运行 `jj git fetch` 同步远端基线；初始化后才能使用本工作流规定的 `jj status`、`jj new` 和 bookmark 命令。
+6. 复杂任务使用 GitHub Issue 记录边界；小型低风险任务使用当前会话中的明确人类授权。
+7. 使用一个 jj change 完成实现、验证与 Agent 自审，通过 Pull Request 交给人类决定是否 Squash Merge。
 
 ## 本仓库验证
 

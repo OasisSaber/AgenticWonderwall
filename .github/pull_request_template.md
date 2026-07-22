@@ -1,9 +1,12 @@
 ## Related task
 
-<!-- 二选一，删除不适用项。不得伪造 Issue 编号。 -->
+<!-- 二选一，删除不适用项。不得保留占位文本或伪造 Issue 编号。-->
 
-- Issue: `Closes #<number>`
-- Explicit human authorization: `<source, goal, and scope>`
+- Issue: Closes #<number>
+- Explicit human authorization:
+  - Authorization source:
+  - Goal:
+  - Scope:
 
 ## Result
 
