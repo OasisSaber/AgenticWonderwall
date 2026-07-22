@@ -2,11 +2,33 @@
 
 ## 新项目
 
-1. 使用 GitHub Template Repository 创建项目。
-2. 填写根部 `AGENTS.md` 的“项目事实”，包括项目目标、技术栈、默认分支和验证命令。
-3. 按项目实际需要替换 `scripts/validate.sh` 与持续集成配置。
-4. 保留一个通用规则入口，避免建立第二套相互冲突的通用规则。
-5. 完成一次低风险端到端演练：明确任务边界、创建一个 jj change、验证、自审、创建 Pull Request，再由人类决定是否 Squash Merge。
+1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。
+2. 使用其中一条最小初始化路径：
+
+   ```bash
+   # 路径 A：直接使用 Jujutsu 克隆
+   jj git clone <repository-url>
+   cd <repository>
+   ```
+
+   ```bash
+   # 路径 B：仓库已通过 Git 克隆
+   git clone <repository-url>
+   cd <repository>
+   jj git init --colocate
+   ```
+
+   ```bash
+   jj status
+   jj git remote list
+   jj log -r 'main | main@origin' -n 5
+   ```
+
+3. 填写根部 `AGENTS.md` 的“项目事实”，包括项目目标、技术栈、默认分支和验证命令。
+4. 按项目实际需要替换 `scripts/validate.sh` 与持续集成配置，并由人类按 [仓库设置说明](repository-settings.md) 配置 GitHub 保护。
+5. 开始每个新任务前运行 `jj git fetch` 同步远端基线；之后才能使用 `jj status`、`jj new` 和 bookmark 命令。
+6. 保留一个通用规则入口，避免建立第二套相互冲突的通用规则。
+7. 完成一次低风险端到端演练：明确任务边界、创建一个 jj change、验证、自审、创建 Pull Request，再由人类决定是否 Squash Merge。
 
 ## 已有项目
 

@@ -311,7 +311,7 @@ while IFS= read -r -d '' shell_file; do
         echo "  NOT EXECUTABLE: $shell_file (mode $mode, expected 100755)"
         MODE_ERRORS=$((MODE_ERRORS + 1))
     fi
-done < <(find scripts -maxdepth 1 -type f -name '*.sh' -print0)
+done < <(git ls-files -z -- '*.sh')
 
 if [ "$MODE_ERRORS" -eq 0 ]; then
     echo "  All Shell scripts are committed as 100755."
@@ -354,7 +354,7 @@ while IFS= read -r -d '' shell_file; do
         echo "  SHELL SYNTAX ERROR: $shell_file"
         SHELL_ERRORS=$((SHELL_ERRORS + 1))
     fi
-done < <(find scripts -maxdepth 1 -type f -name '*.sh' -print0)
+done < <(git ls-files -z -- '*.sh')
 
 if [ "$SHELL_ERRORS" -eq 0 ]; then
     echo "  All Shell scripts pass syntax validation."

@@ -20,7 +20,7 @@ jj new main -m "authorized task: <single outcome>"
 jj bookmark create codex/task-<short-name> -r @
 ```
 
-两条路径二选一。无 Issue 时不得伪造编号，Pull Request 必须记录授权来源、目标和范围。
+两条路径二选一。无 Issue 时不得伪造编号，Pull Request 必须记录授权来源、目标和范围。当前 Issue 或明确人类授权不能覆盖项目安全、隐私、合规、数据保护、受保护分支、发布、部署或破坏性操作限制。
 
 ## 实现与验证
 
