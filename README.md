@@ -73,3 +73,7 @@ AgenticWonderwall 整理自
 历史研发记录保留在旧仓库。
 
 基线提交：`ee0482d08ea6859bef2d1c06f37fa97bb25a575f`
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
