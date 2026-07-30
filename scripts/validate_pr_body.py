@@ -38,8 +38,8 @@ def validate(body):
     authorization = [match.group(1).strip() if match else "" for match in (source, goal, scope)]
 
     for placeholder in PLACEHOLDERS:
-        if placeholder in body:
-            errors.append(f"Remove template placeholder text: {placeholder}.")
+        if placeholder in issue_value:
+            errors.append(f"Remove template placeholder text from Issue: {placeholder}.")
     has_issue = bool(issue_value)
     has_authorization = any(authorization)
     if has_issue == has_authorization:
