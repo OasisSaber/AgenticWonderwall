@@ -18,6 +18,12 @@ python -m pip install --disable-pip-version-check -r scripts/requirements.txt
 bash scripts/check.sh
 ```
 
-缺少 Python 或 PyYAML 时，验证会明确失败。
+PowerShell 7 入口不复制验证规则，而是定位兼容 Bash 后委托权威入口：
+
+```powershell
+pwsh -NoProfile -File scripts/check.ps1
+```
+
+Windows 优先使用 Git for Windows 自带的 Bash；其他平台从 `PATH` 定位 `bash`。缺少 Bash、Git、Python 或 PyYAML 时，验证会明确失败。Windows PowerShell 5.1 不在支持范围内。
 
 维护 CI 时，从官方发布标签核对 Action 后固定完整提交 SHA，并保留可读版本注释；验证依赖只在审阅版本后更新 `scripts/requirements.txt`。

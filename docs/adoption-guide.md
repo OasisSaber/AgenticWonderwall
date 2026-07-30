@@ -25,7 +25,7 @@
    ```
 
 3. 填写根部 `AGENTS.md` 的“项目事实”，包括项目目标、技术栈、默认分支和验证命令。
-4. 按项目实际需要替换 `scripts/validate.sh` 与持续集成配置，并由人类按 [仓库设置说明](repository-settings.md) 配置 GitHub 保护。
+4. 按项目实际需要替换权威入口 `scripts/check.sh`、共享技术组件 `scripts/validate.sh` 与持续集成配置；需要 Windows 入口时保留委托同一权威命令的 `scripts/check.ps1`，并由人类按 [仓库设置说明](repository-settings.md) 配置 GitHub 保护。
 5. 开始每个新任务前运行 `jj git fetch` 同步远端基线；之后才能使用 `jj status`、`jj new` 和 bookmark 命令。
 6. 保留一个通用规则入口，避免建立第二套相互冲突的通用规则。
 7. 完成一次低风险端到端演练：明确任务边界、创建一个 jj change、验证、自审、创建 Pull Request，再由人类决定是否 Squash Merge。

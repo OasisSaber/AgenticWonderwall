@@ -56,6 +56,12 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 bash scripts/check.sh
 ```
 
+Windows 与 PowerShell 7 可使用等价入口：
+
+```powershell
+pwsh -NoProfile -File scripts/check.ps1
+```
+
 验证入口检查 Python 语法、Pull Request 正文校验器单元测试，以及 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
 
 ## 维护边界

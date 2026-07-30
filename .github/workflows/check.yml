@@ -38,6 +38,10 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: python scripts/validate_pr_body.py
 
-      - name: Check repository
+      - name: Check repository with Bash
         run: bash scripts/check.sh
         shell: bash
+
+      - name: Check PowerShell entry
+        run: ./scripts/check.ps1
+        shell: pwsh
