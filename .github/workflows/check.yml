@@ -34,9 +34,6 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: python scripts/validate_pr_body.py
 
-      - name: Test Pull Request body validator
-        run: python scripts/test_validate_pr_body.py
-
-      - name: Validate
-        run: bash scripts/validate.sh
+      - name: Check repository
+        run: bash scripts/check.sh
         shell: bash

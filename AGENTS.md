@@ -10,7 +10,7 @@
 - 默认分支：`main`
 - 验证入口：
   ```bash
-  bash scripts/validate.sh
+  bash scripts/check.sh
   ```
 - 合并方式：只接受人类决定的 Squash Merge
 
@@ -69,7 +69,7 @@ Agent 可在已记录范围内修改文件、运行验证、设置 bookmark、pu
 每次 push 前必须运行：
 
 ```bash
-bash scripts/validate.sh
+bash scripts/check.sh
 ```
 
 验证失败时必须修正并重跑，不得把失败或未验证状态表述为成功。
