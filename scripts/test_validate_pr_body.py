@@ -43,6 +43,14 @@ class ValidatePrBodyTests(unittest.TestCase):
     def test_both_paths(self): self.assertTrue(validate(BASE.replace("  - Authorization source:", "  - Authorization source: chat")))
     def test_no_paths(self): self.assertTrue(validate(BASE.replace("Closes #1", "")))
     def test_placeholder(self): self.assertTrue(validate(BASE.replace("#1", "#<number>")))
+    def test_placeholder_text_outside_issue_field_is_allowed(self):
+        for body in (
+            BASE.replace("Changed files.", "Changed literal `<number>` handling."),
+            BASE + "\n## Notes for human\nThe template uses `<number>` as an example.\n",
+            BASE.replace("Tests passed.", "```text\n<number>\n```\nTests passed."),
+        ):
+            with self.subTest(body=body):
+                self.assertEqual([], validate(body))
 
     def test_empty_sections(self):
         for heading in ("Result", "Changes", "Verification"):
