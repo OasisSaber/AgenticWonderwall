@@ -7,7 +7,11 @@ import sys
 from pathlib import Path
 
 PLACEHOLDERS = ("<number>",)
-ISSUE = re.compile(r"#\d+\b")
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+ISSUE = re.compile(
+    r"(?:close(?:s|d)?|fix(?:es|ed)?|resolve(?:s|d)?)\s+#\d+",
+    re.IGNORECASE,
+)
 HEADERS = ("Result", "Changes", "Verification", "Agent self-review")
 REQUIRED_REVIEW_ITEMS = (
     "满足 Issue 或明确人类授权",
@@ -25,10 +29,11 @@ def section(body, heading):
 
 def validate(body):
     errors = []
-    issue = re.search(r"(?m)^- Issue:[ \t]*(.*)$", body)
-    source = re.search(r"(?m)^  - Authorization source:[ \t]*(.*)$", body)
-    goal = re.search(r"(?m)^  - Goal:[ \t]*(.*)$", body)
-    scope = re.search(r"(?m)^  - Scope:[ \t]*(.*)$", body)
+    visible_body = HTML_COMMENT.sub("", body)
+    issue = re.search(r"(?m)^- Issue:[ \t]*(.*)$", visible_body)
+    source = re.search(r"(?m)^  - Authorization source:[ \t]*(.*)$", visible_body)
+    goal = re.search(r"(?m)^  - Goal:[ \t]*(.*)$", visible_body)
+    scope = re.search(r"(?m)^  - Scope:[ \t]*(.*)$", visible_body)
     issue_value = issue.group(1).strip() if issue else ""
     authorization = [match.group(1).strip() if match else "" for match in (source, goal, scope)]
 
@@ -39,18 +44,20 @@ def validate(body):
     has_authorization = any(authorization)
     if has_issue == has_authorization:
         errors.append("Fill exactly one of Issue or explicit human authorization.")
-    if has_issue and not ISSUE.search(issue_value):
-        errors.append("Issue must contain a valid reference such as #123.")
+    if has_issue and not ISSUE.fullmatch(issue_value):
+        errors.append(
+            "Issue must be one closing reference such as Closes #123."
+        )
     if has_authorization:
         for name, value in zip(("Authorization source", "Goal", "Scope"), authorization):
             if not value:
                 errors.append(f"Explicit human authorization requires {name}.")
 
     for heading in HEADERS[:3]:
-        content = section(body, heading)
+        content = section(visible_body, heading)
         if not content:
             errors.append(f"{heading} must not be empty.")
-    review = section(body, "Agent self-review") or ""
+    review = section(visible_body, "Agent self-review") or ""
     for item in REQUIRED_REVIEW_ITEMS:
         checked = re.search(rf"(?m)^- \[[xX]\] {re.escape(item)}$", review)
         present = re.search(rf"(?m)^- \[[ xX]\] {re.escape(item)}$", review)
