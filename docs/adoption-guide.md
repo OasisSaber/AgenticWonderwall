@@ -1,5 +1,14 @@
 # AgenticWonderwall 采用指南
 
+## 工具与平台基线
+
+- Jujutsu `0.43.0` 或更高版本。
+- Git `2.34.0` 或更高版本；Windows 安装包含 Git Bash 的 Git for Windows。
+- Linux/macOS 使用 Bash；Windows 使用 PowerShell 7 等价入口。
+- 文档默认远端名为 `origin`、受保护分支为 `main`。采用项目不同名时必须统一替换。
+
+采用前运行 `jj --version` 与 `git --version`，把真实版本记录在演练结果中。
+
 ## 新项目
 
 1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。
@@ -21,6 +30,7 @@
    ```bash
    jj status
    jj git remote list
+   jj bookmark list --all-remotes main
    jj log -r 'main | main@origin' -n 5
    ```
 
@@ -29,6 +39,26 @@
 5. 开始每个新任务前运行 `jj git fetch` 同步远端基线；之后才能使用 `jj status`、`jj new` 和 bookmark 命令。
 6. 保留一个通用规则入口，避免建立第二套相互冲突的通用规则。
 7. 完成一次低风险端到端演练：明确任务边界、创建一个 jj change、验证、自审、创建 Pull Request，再由人类决定是否 Squash Merge。
+
+完整的日常命令、bookmark 跟踪、PR 更新、冲突停止条件与清理路径见 [CONTRIBUTING.md](../CONTRIBUTING.md)。
+
+## 新仓库烟雾测试
+
+维护者应在全新的采用仓库中完成一次真实但低风险的端到端演练：
+
+- [ ] 记录 `jj --version`、`git --version`、操作系统与所用验证入口。
+- [ ] 通过 `jj git clone`，或通过 `git clone` 后运行 `jj git init --colocate`。
+- [ ] 运行 `jj git fetch --remote origin`，确认 `main`、`main@origin` 和 `jj bookmark list --conflicted` 没有冲突。
+- [ ] 用一个真实 Issue 或明确人类授权创建单独 jj change 与短期 bookmark。
+- [ ] 做一处容易审阅和回滚的变更，运行 `bash scripts/check.sh`；Windows 同时运行 `pwsh -NoProfile -File scripts/check.ps1`。
+- [ ] 阅读完整 diff，只 push 任务 bookmark，并确认该 bookmark 已跟踪 `@origin`。
+- [ ] 创建 Draft Pull Request，确认正文校验与仓库 CI 通过。
+- [ ] 由人类决定并执行 Squash Merge；Agent 不执行 merge。
+- [ ] fetch 最新 `main`，新建基于 `main` 的空 change，并用 `jj bookmark forget` 完成本地清理。
+- [ ] 若要删除仍存在的远端 bookmark，另行记录明确人类决定，先 dry-run，再执行远端删除。
+- [ ] 将演练任务、PR、合并提交、验证结果和任何平台限制写入采用记录。
+
+任一步出现 conflicted bookmark、push 拒绝、未经确认的远端差异或范围扩大时，烟雾测试失败并停止；不得靠强推、自动冲突解决或跳过验证继续。
 
 ## 已有项目
 
@@ -46,6 +76,10 @@
 来源: AgenticWonderwall v1.0.0
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>
+Jujutsu 版本: <jj --version>
+Git 版本: <git --version>
+平台与验证入口: <OS / Bash / PowerShell 7>
+首次演练 PR: <URL>
 ```
 
 Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。
