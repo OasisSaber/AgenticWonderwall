@@ -31,7 +31,7 @@ jj bookmark list --tracked main
 
 ## 复杂任务
 
-先创建 GitHub Issue，记录目标、范围、验收条件和排除项：
+先在 GitHub 新建 Issue 时选择唯一的[复杂任务 Issue form](.github/ISSUE_TEMPLATE/complex-task.yml)，记录目标、范围、验收条件、排除项、依赖与执行顺序：
 
 ```bash
 jj new main -m "issue #<number>: <single outcome>"
