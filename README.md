@@ -26,9 +26,21 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 - Linux/macOS 使用 Bash；Windows 支持 PowerShell 7 等价验证入口。
 - 示例默认远端为 `origin`、受保护分支为 `main`。
 
+## 采用方式
+
+### 完整模板
+
+推荐通过 GitHub Template Repository 创建新仓库。完整模板的最小维护集合包括根部 `AGENTS.md`、`CONTRIBUTING.md`、`.github/`、`scripts/` 与 `docs/`；这些文件共同提供任务规则、Pull Request/Issue 入口、验证命令和采用说明。
+
+### 仅采用通用规则
+
+可以只摘取根部 `AGENTS.md`，但它不是无需修改即可独立运行的配置文件。采用者必须先替换“项目事实”和验证命令，并删除或替换没有一并复制的仓库内链接、PowerShell 入口和可选依赖任务路径。不得把不存在的 `scripts/check.sh` 或支持文档继续声明为有效入口。
+
+两种方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
+
 ## 快速开始
 
-1. 使用 GitHub Template Repository 创建新仓库，或只复制 `AGENTS.md`。模板只复制仓库文件，不会复制本地 `.jj` 状态。
+1. 使用 GitHub Template Repository 创建完整模板仓库；若只采用 `AGENTS.md`，先按上面的“仅采用通用规则”边界完成定制。
 2. 在本地初始化 Jujutsu 工作区；二选一：
 
    ```bash

@@ -9,6 +9,30 @@
 
 采用前运行 `jj --version` 与 `git --version`，把真实版本记录在演练结果中。
 
+## 选择采用范围
+
+### 完整模板采用
+
+推荐使用 GitHub Template Repository。最低维护集合包括：
+
+- 根部 `AGENTS.md` 与 `CONTRIBUTING.md`；
+- `.github/pull_request_template.md`、`.github/workflows/` 与需要的 Issue Form；
+- `scripts/` 中的权威验证入口、共享验证组件、依赖文件和测试；
+- `docs/` 中被采用规则引用的支持文档。
+
+采用者可以删除明确不需要的可选路径，但删除前必须同步移除所有指向该入口的规则和链接，避免留下不存在的验证命令或支持文档。
+
+### 仅采用 `AGENTS.md`
+
+只复制根部 `AGENTS.md` 时，应把它视为规则素材而不是可直接运行的完整配置。采用前必须：
+
+1. 替换项目名、目标、技术栈、默认分支和真实验证命令；
+2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1` 与支持文档链接；
+3. 删除不采用的可选依赖任务路径，或一并复制并维护其支持文档；
+4. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
+
+任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
+
 ## 新项目
 
 1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。
@@ -63,7 +87,7 @@
 ## 已有项目
 
 1. 盘点现有 Agent 规则、分支保护、权限、安全、测试和交付约束。
-2. 复制 `AGENTS.md`，将“项目事实”替换为当前项目的真实信息。
+2. 选择完整模板采用或仅采用 `AGENTS.md`，并按“选择采用范围”完成对应定制。
 3. 保留项目自身的架构、安全、测试和交付资料，并按照 `AGENTS.md` 的权威顺序引用它们。
 4. 合并或移除重复的通用规则，避免不同文件同时声明最高权威。
 5. 根据现有技术栈配置验证脚本与持续集成，然后完成低风险演练。
@@ -73,7 +97,8 @@
 在采用项目的文档中记录：
 
 ```markdown
-来源: AgenticWonderwall v1.0.0
+来源: AgenticWonderwall <release-tag-or-full-commit-sha>
+采用范围: <完整模板 / 仅 AGENTS.md / 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>
 Jujutsu 版本: <jj --version>
@@ -82,4 +107,4 @@ Git 版本: <git --version>
 首次演练 PR: <URL>
 ```
 
-Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。
+Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。采用来源必须填写实际使用的 Release tag 或完整 commit SHA。
