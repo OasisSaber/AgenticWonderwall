@@ -27,7 +27,7 @@ jj bookmark create codex/task-<short-name> -r @
 只修改任务范围内的文件，不混入或覆盖来源不明的修改。验证入口为：
 
 ```bash
-bash scripts/validate.sh
+bash scripts/check.sh
 ```
 
 push 前运行：

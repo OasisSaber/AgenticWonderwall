@@ -14,7 +14,7 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 | 人类入口 | [README.md](README.md) |
 | 维护入口 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
-| 验证入口 | `bash scripts/validate.sh` |
+| 验证入口 | `bash scripts/check.sh` |
 | 复制接口 | GitHub Template Repository |
 | 版本接口 | Git tag / GitHub Release |
 
@@ -53,10 +53,10 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 ## 本仓库验证
 
 ```bash
-bash scripts/validate.sh
+bash scripts/check.sh
 ```
 
-验证入口检查 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
+验证入口检查 Python 语法、Pull Request 正文校验器单元测试，以及 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
 
 ## 维护边界
 
