@@ -4,9 +4,10 @@
 
 ## 支持环境
 
-- Jujutsu `0.43.0` 或更高版本。
+- Jujutsu `0.43.0` 的本文档命令已验证；更高版本必须在采用时重新完成烟雾测试。
 - Git `2.34.0` 或更高版本；Windows 使用包含 Git Bash 的 Git for Windows。
-- Linux 与 macOS 使用 Bash；Windows 可以从 PowerShell 7 调用等价验证入口。
+- `VERIFIED`：Ubuntu GitHub Actions 中的 Bash 入口与 PowerShell 7 委托入口。
+- `PARTIAL`：macOS Bash 与真实 Windows PowerShell 7 + Git for Windows；采用时必须在目标平台运行完整烟雾测试。
 - 以下命令假设默认分支为 `main`、远端为 `origin`。采用项目使用其他名称时应一致替换。
 
 开始前记录版本并同步远端：
@@ -70,6 +71,8 @@ Windows 与 PowerShell 7 等价入口：
 ```powershell
 pwsh -NoProfile -File scripts/check.ps1
 ```
+
+当前 CI 只在 Ubuntu 上验证 Bash 与 PowerShell 委托入口。真实 Windows 或 macOS 环境在完成目标平台烟雾测试前只能标记为 `PARTIAL`。
 
 push 前运行：
 
@@ -186,7 +189,7 @@ jj git push --deleted --remote origin
 - PR 正文记录真实验证结果、限制和未覆盖内容；
 - 未执行 merge、release、远端删除或未经授权的已发布历史重写。
 
-Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://docs.jj-vcs.dev/latest/bookmarks/)和[官方 CLI reference](https://docs.jj-vcs.dev/latest/cli-reference/)为准；本文件只描述本仓库采用的单 change 生命周期。
+Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://docs.jj-vcs.dev/latest/bookmarks/)和[官方 CLI reference](https://docs.jj-vcs.dev/latest/cli-reference/)为准；本文件只描述本仓库在 Jujutsu `0.43.0` 上核对过的单 change 生命周期，更高版本采用前必须重新验证命令语义。
 
 ## 可选依赖任务路径
 
