@@ -187,3 +187,7 @@ jj git push --deleted --remote origin
 - 未执行 merge、release、远端删除或未经授权的已发布历史重写。
 
 Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://docs.jj-vcs.dev/latest/bookmarks/)和[官方 CLI reference](https://docs.jj-vcs.dev/latest/cli-reference/)为准；本文件只描述本仓库采用的单 change 生命周期。
+
+## 可选依赖任务路径
+
+默认保持一次只推进一个任务。只有 Issue 明确声明有序依赖链时，才使用[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)；该路径不会改变每任务独立 change、bookmark、PR、验证与人工合并边界。
