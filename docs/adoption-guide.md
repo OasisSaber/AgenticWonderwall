@@ -2,12 +2,13 @@
 
 ## 工具与平台基线
 
-- Jujutsu `0.43.0` 或更高版本。
+- Jujutsu `0.43.0` 的本文档命令已验证；更高版本必须在采用时重新完成烟雾测试。
 - Git `2.34.0` 或更高版本；Windows 安装包含 Git Bash 的 Git for Windows。
-- Linux/macOS 使用 Bash；Windows 使用 PowerShell 7 等价入口。
+- `VERIFIED`：Ubuntu GitHub Actions 中的 Bash 权威入口与 PowerShell 7 委托入口。
+- `PARTIAL`：macOS Bash 与真实 Windows PowerShell 7 + Git for Windows；采用时必须在目标平台运行完整烟雾测试。
 - 文档默认远端名为 `origin`、受保护分支为 `main`。采用项目不同名时必须统一替换。
 
-采用前运行 `jj --version` 与 `git --version`，把真实版本记录在演练结果中。
+采用前运行 `jj --version` 与 `git --version`，把真实版本、操作系统和验证状态记录在演练结果中。不得仅因仓库提供入口就把 `PARTIAL` 平台表述为已验证。
 
 ## 选择采用范围
 
@@ -70,17 +71,19 @@
 
 维护者应在全新的采用仓库中完成一次真实但低风险的端到端演练：
 
-- [ ] 记录 `jj --version`、`git --version`、操作系统与所用验证入口。
+- [ ] 记录 `jj --version`、`git --version`、操作系统、验证入口，以及开始时的 `VERIFIED` 或 `PARTIAL` 状态。
 - [ ] 通过 `jj git clone`，或通过 `git clone` 后运行 `jj git init --colocate`。
 - [ ] 运行 `jj git fetch --remote origin`，确认 `main`、`main@origin` 和 `jj bookmark list --conflicted` 没有冲突。
 - [ ] 用一个真实 Issue 或明确人类授权创建单独 jj change 与短期 bookmark。
-- [ ] 做一处容易审阅和回滚的变更，运行 `bash scripts/check.sh`；Windows 同时运行 `pwsh -NoProfile -File scripts/check.ps1`。
+- [ ] 做一处容易审阅和回滚的变更，运行 `bash scripts/check.sh`；真实 Windows 同时运行 `pwsh -NoProfile -File scripts/check.ps1`，macOS 在本机运行 Bash 入口。
 - [ ] 阅读完整 diff，只 push 任务 bookmark，并确认该 bookmark 已跟踪 `@origin`。
 - [ ] 创建 Draft Pull Request，确认正文校验与仓库 CI 通过。
 - [ ] 由人类决定并执行 Squash Merge；Agent 不执行 merge。
 - [ ] fetch 最新 `main`，新建基于 `main` 的空 change，并用 `jj bookmark forget` 完成本地清理。
 - [ ] 若要删除仍存在的远端 bookmark，另行记录明确人类决定，先 dry-run，再执行远端删除。
 - [ ] 将演练任务、PR、合并提交、验证结果和任何平台限制写入采用记录。
+
+只有目标平台的完整烟雾测试通过后，才能把该平台从 `PARTIAL` 记录为采用项目自身的 `VERIFIED`。这不会自动扩大 AgenticWonderwall 上游仓库的验证范围。
 
 任一步出现 conflicted bookmark、push 拒绝、未经确认的远端差异或范围扩大时，烟雾测试失败并停止；不得靠强推、自动冲突解决或跳过验证继续。
 
@@ -104,7 +107,8 @@
 Jujutsu 版本: <jj --version>
 Git 版本: <git --version>
 平台与验证入口: <OS / Bash / PowerShell 7>
+验证状态: <VERIFIED / PARTIAL>
 首次演练 PR: <URL>
 ```
 
-Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。采用来源必须填写实际使用的 Release tag 或完整 commit SHA。
+Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。采用来源必须填写实际使用的 Release tag 或完整 commit SHA。`PARTIAL` 只描述尚未在真实目标平台完成烟雾测试，不应被写成完整跨平台支持。

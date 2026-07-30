@@ -8,6 +8,12 @@
 
 `validate_pr_body.py` 仅使用 Python 标准库校验 Pull Request 正文的固定模板字段；`validate_markdown_links.py` 校验仓库内 Markdown 文件、图片与受支持的标题锚点。CI 仅在 Pull Request 事件中对实时正文单独运行前者。运行环境需要 Bash、Git、Python 和 PyYAML。持续集成使用 Python 3.12.7 与 PyYAML 6.0.3。
 
+## 支持状态
+
+- `VERIFIED`：当前 Ubuntu GitHub Actions 中直接运行 `scripts/check.sh`，并通过 PowerShell 7 调用 `scripts/check.ps1` 委托同一 Bash 入口。
+- `PARTIAL`：真实 Windows PowerShell 7 + Git for Windows 与 macOS Bash。仓库提供入口，但当前 CI 不在这些原生平台运行；采用者必须在目标平台完成烟雾测试。
+- Windows PowerShell 5.1 不在支持范围内。
+
 本地安装固定的验证依赖：
 
 ```bash
@@ -24,6 +30,6 @@ PowerShell 7 入口不复制验证规则，而是定位兼容 Bash 后委托权�
 pwsh -NoProfile -File scripts/check.ps1
 ```
 
-Windows 优先使用 Git for Windows 自带的 Bash；其他平台从 `PATH` 定位 `bash`。缺少 Bash、Git、Python 或 PyYAML 时，验证会明确失败。Windows PowerShell 5.1 不在支持范围内。
+Windows 优先使用 Git for Windows 自带的 Bash；其他平台从 `PATH` 定位 `bash`。缺少 Bash、Git、Python 或 PyYAML 时，验证会明确失败。入口存在不等于真实 Windows 或 macOS 已由上游 CI 验证。
 
 维护 CI 时，从官方发布标签核对 Action 后固定完整提交 SHA，并保留可读版本注释；验证依赖只在审阅版本后更新 `scripts/requirements.txt`。

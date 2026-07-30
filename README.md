@@ -19,11 +19,12 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 | 复制接口 | GitHub Template Repository |
 | 版本接口 | Git tag / GitHub Release |
 
-## 支持基线
+## 支持与验证状态
 
-- Jujutsu `0.43.0` 或更高版本。
-- Git `2.34.0` 或更高版本；Windows 使用包含 Git Bash 的 Git for Windows。
-- Linux/macOS 使用 Bash；Windows 支持 PowerShell 7 等价验证入口。
+- `VERIFIED`：Ubuntu GitHub Actions 中的 Bash 权威入口，以及 PowerShell 7 委托同一 Bash 入口的路径。
+- `PARTIAL`：macOS Bash 与真实 Windows PowerShell 7 + Git for Windows 环境；仓库提供入口和采用烟雾测试，但当前 CI 不在这些原生平台运行。
+- Jujutsu：本文档命令已使用 `0.43.0` 核对；更高版本不是自动验证范围，采用时必须重新运行烟雾测试。
+- Git：文档假设 `2.34.0` 或更高版本。
 - 示例默认远端为 `origin`、受保护分支为 `main`。
 
 ## 采用方式
@@ -59,6 +60,8 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
    初始化后运行：
 
    ```bash
+   jj --version
+   git --version
    jj status
    jj git remote list
    jj log -r 'main | main@origin' -n 5
@@ -82,11 +85,13 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 bash scripts/check.sh
 ```
 
-Windows 与 PowerShell 7 可使用等价入口：
+PowerShell 7 可使用委托同一 Bash 权威入口的等价命令：
 
 ```powershell
 pwsh -NoProfile -File scripts/check.ps1
 ```
+
+当前 GitHub Actions 在 Ubuntu 上同时运行上述 Bash 和 PowerShell 委托入口。真实 Windows 与 macOS 支持状态为 `PARTIAL`，采用者必须在目标平台完成[新仓库烟雾测试](docs/adoption-guide.md#新仓库烟雾测试)后再声明为已验证。
 
 验证入口检查 Python 语法、Pull Request 正文校验器单元测试，以及 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
 
