@@ -8,6 +8,8 @@
 - 项目名：AgenticWonderwall
 - 项目目标：维护面向个人开发者的单 Agent GitHub Flow + Jujutsu 工作流模板
 - 默认分支：`main`
+- 工具基线：Jujutsu `0.43.0` 或更高版本、Git `2.34.0` 或更高版本
+- 平台假设：Linux/macOS 使用 Bash；Windows 使用 PowerShell 7，并安装提供兼容 Bash 的 Git for Windows
 - 验证入口：
   ```bash
   bash scripts/check.sh
@@ -61,6 +63,8 @@ GitHub Issue → 一个 jj change → 验证与 Agent 自审 → Pull Request �
 - 不覆盖来源不明的修改。
 - push 前读取完整 diff，并检查范围、误删、临时文件与无关生成物。
 - 已发布历史不得擅自重写；需要改变已发布历史时必须先获得明确人类授权。
+- fetch 后发现 `main`、`main@origin` 或任务 bookmark 冲突时必须停止，不得猜测目标、自动解决或 push。
+- 人类 Squash Merge 后可以清理本地短期 bookmark；删除远端 bookmark 仍需要另一次单独、明确的人类决定。
 
 ## 验证、push 与 Pull Request
 

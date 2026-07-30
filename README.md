@@ -14,9 +14,17 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 | 人类入口 | [README.md](README.md) |
 | 维护入口 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
+| 完整任务生命周期 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 验证入口 | `bash scripts/check.sh` |
 | 复制接口 | GitHub Template Repository |
 | 版本接口 | Git tag / GitHub Release |
+
+## 支持基线
+
+- Jujutsu `0.43.0` 或更高版本。
+- Git `2.34.0` 或更高版本；Windows 使用包含 Git Bash 的 Git for Windows。
+- Linux/macOS 使用 Bash；Windows 支持 PowerShell 7 等价验证入口。
+- 示例默认远端为 `origin`、受保护分支为 `main`。
 
 ## 快速开始
 
@@ -49,6 +57,8 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 5. 开始新任务前运行 `jj git fetch` 同步远端基线；初始化后才能使用本工作流规定的 `jj status`、`jj new` 和 bookmark 命令。
 6. 复杂任务使用 GitHub Issue 记录边界；小型低风险任务使用当前会话中的明确人类授权。
 7. 使用一个 jj change 完成实现、验证与 Agent 自审，通过 Pull Request 交给人类决定是否 Squash Merge。
+
+从同步、创建 change、跟踪与 push bookmark、更新 Pull Request，到人工 Squash Merge 后清理的完整命令见 [CONTRIBUTING.md](CONTRIBUTING.md)。遇到 `main`、`main@origin` 或任务 bookmark 冲突时停止，不要强推或猜测目标。
 
 ## 本仓库验证
 
