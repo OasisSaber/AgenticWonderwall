@@ -55,6 +55,16 @@ GitHub Issue → 一个 jj change → 验证与 Agent 自审 → Pull Request �
 
 无 Issue 时不得伪造编号。实现需要扩大范围时必须停止，向人类说明原因并转为 Issue 路径。
 
+### 可选依赖任务路径
+
+默认仍是一次只推进一个独立任务。只有多个 Issue 明确记录有序依赖链时，才可以按[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)提前准备下游任务。
+
+- 每个队列任务都必须有独立 Issue，并分别对应一个 jj change、一个短期 bookmark 和一个 Pull Request；不进入队列的小型任务仍可使用授权路径。
+- 前置任务未由人类合并时，下游 Pull Request 必须保持 Draft，并以直接前置任务的 bookmark 为 base。
+- 上游 change 更新或合并后，重写任何已发布下游历史前必须取得列明受影响 change 与 bookmark 的明确人类授权。
+- 上游经人类 Squash Merge 后，下游必须 fetch、基于当前 `main` restack、完整验证、阅读完整 diff，并确认 Pull Request 只包含自身任务；不满足任一条件时不得进入 Ready。
+- 队列中的每次 merge 仍是独立的人类决定，不得自动 merge、release、删除远端数据或解决冲突。
+
 ## jj change 与工作区
 
 - 一个任务对应一个可验证的 jj change。

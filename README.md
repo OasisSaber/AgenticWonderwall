@@ -60,6 +60,10 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 
 从同步、创建 change、跟踪与 push bookmark、更新 Pull Request，到人工 Squash Merge 后清理的完整命令见 [CONTRIBUTING.md](CONTRIBUTING.md)。遇到 `main`、`main@origin` 或任务 bookmark 冲突时停止，不要强推或猜测目标。
 
+## 可选高级路径
+
+默认工作流不要求任务队列。只有多个 Issue 明确声明有序依赖链时，单 Agent 才可以使用[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)提前准备下游任务；每个任务仍保持独立 change、bookmark、PR、验证和人工合并决定。
+
 ## 本仓库验证
 
 ```bash
