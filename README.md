@@ -55,7 +55,7 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 3. 在 `AGENTS.md` 的“项目事实”中填写项目目标、技术栈、验证命令和默认分支。
 4. 按项目需要替换验证脚本和持续集成配置，并按 [仓库设置说明](docs/repository-settings.md) 由人类配置 GitHub 保护规则。
 5. 开始新任务前运行 `jj git fetch` 同步远端基线；初始化后才能使用本工作流规定的 `jj status`、`jj new` 和 bookmark 命令。
-6. 复杂任务使用 GitHub Issue 记录边界；小型低风险任务使用当前会话中的明确人类授权。
+6. 复杂任务使用[复杂任务 Issue form](.github/ISSUE_TEMPLATE/complex-task.yml)记录边界；小型低风险任务仍使用当前会话中的明确人类授权。
 7. 使用一个 jj change 完成实现、验证与 Agent 自审，通过 Pull Request 交给人类决定是否 Squash Merge。
 
 从同步、创建 change、跟踪与 push bookmark、更新 Pull Request，到人工 Squash Merge 后清理的完整命令见 [CONTRIBUTING.md](CONTRIBUTING.md)。遇到 `main`、`main@origin` 或任务 bookmark 冲突时停止，不要强推或猜测目标。

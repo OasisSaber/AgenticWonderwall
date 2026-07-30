@@ -1,0 +1,71 @@
+name: 复杂任务
+description: 为跨模块、较大范围或存在歧义的工作记录完整任务边界
+title: "[复杂任务] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        此表单用于 `AGENTS.md` 定义的复杂任务路径，只记录任务目标与边界，不改变仓库的权威顺序或人工保留操作。
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 描述本任务要达成的单一、可验证结果。
+      placeholder: 完成后，使用者能够……
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 范围
+      description: 列出本任务包含的工作、允许修改的区域以及必须保持不变的边界。
+      placeholder: |
+        - 包含：
+        - 允许修改：
+        - 必须保持不变：
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: 验收条件
+      description: 使用可检查的条目说明何时可以认为任务完成。
+      placeholder: |
+        - [ ] 条件一
+        - [ ] 条件二
+    validations:
+      required: true
+
+  - type: textarea
+    id: exclusions
+    attributes:
+      label: 排除项
+      description: 明确本任务不会实现、不会修改或留待后续处理的内容。
+      placeholder: |
+        - 不包含：
+        - 留待后续：
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies_order
+    attributes:
+      label: 依赖与执行顺序
+      description: 记录前置 Issue、外部依赖或必须遵守的执行顺序；没有依赖时填写“无”。
+      placeholder: |
+        - 依赖：
+        - 执行顺序：
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: authority_boundary
+    attributes:
+      label: 权限边界确认
+      description: 创建 Issue 只记录任务边界，不构成下列操作的授权。
+      options:
+        - label: 我确认 merge、release、远端数据删除、破坏性操作和范围扩大仍需人类另行明确决定。
+          required: true
