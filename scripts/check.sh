@@ -7,6 +7,22 @@ FAILED=0
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_DIR" || exit 1
 
+if ! command -v git >/dev/null 2>&1; then
+    echo "ERROR: Git is required for repository validation." >&2
+    exit 1
+fi
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "ERROR: repository validation must run inside a Git worktree." >&2
+    exit 1
+fi
+
+PYTHON_FILES="$(mktemp)" || exit 1
+trap 'rm -f "$PYTHON_FILES"' EXIT
+if ! git ls-files -z -- 'scripts/*.py' >"$PYTHON_FILES"; then
+    echo "ERROR: unable to enumerate tracked Python validation scripts." >&2
+    exit 1
+fi
+
 PYTHON=""
 if python3 -c "import sys" >/dev/null 2>&1; then
     PYTHON="python3"
@@ -41,7 +57,7 @@ PY
         then
             PYTHON_ERRORS=$((PYTHON_ERRORS + 1))
         fi
-    done < <(git ls-files -z -- 'scripts/*.py')
+    done <"$PYTHON_FILES"
 fi
 
 if [ "$PYTHON_ERRORS" -eq 0 ]; then
