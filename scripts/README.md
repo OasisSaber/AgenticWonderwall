@@ -8,8 +8,16 @@
 
 `validate_pr_body.py` 仅使用 Python 标准库校验 Pull Request 正文的固定模板字段；CI 仅在 Pull Request 事件中对实时正文单独运行它。运行环境需要 Bash、Git、Python 和 PyYAML。持续集成使用 Python 3.12.7 与 PyYAML 6.0.3。
 
+本地安装固定的验证依赖：
+
+```bash
+python -m pip install --disable-pip-version-check -r scripts/requirements.txt
+```
+
 ```bash
 bash scripts/check.sh
 ```
 
 缺少 Python 或 PyYAML 时，验证会明确失败。
+
+维护 CI 时，从官方发布标签核对 Action 后固定完整提交 SHA，并保留可读版本注释；验证依赖只在审阅版本后更新 `scripts/requirements.txt`。
