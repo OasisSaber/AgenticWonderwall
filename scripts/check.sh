@@ -52,14 +52,14 @@ else
 fi
 echo ""
 
-echo "--- Check 2: Pull Request body validator tests ---"
+echo "--- Check 2: Validation unit tests ---"
 if [ -z "$PYTHON" ]; then
     echo "  UNAVAILABLE: Python is required."
     FAILED=$((FAILED + 1))
-elif "$PYTHON" scripts/test_validate_pr_body.py; then
-    echo "  Pull Request body validator tests passed."
+elif "$PYTHON" -m unittest discover -s scripts -p 'test_*.py'; then
+    echo "  Validation unit tests passed."
 else
-    echo "  Pull Request body validator tests failed."
+    echo "  Validation unit tests failed."
     FAILED=$((FAILED + 1))
 fi
 echo ""
