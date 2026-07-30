@@ -8,8 +8,8 @@
 - 项目名：AgenticWonderwall
 - 项目目标：维护面向个人开发者的单 Agent GitHub Flow + Jujutsu 工作流模板
 - 默认分支：`main`
-- 工具基线：Jujutsu `0.43.0` 或更高版本、Git `2.34.0` 或更高版本
-- 平台假设：Linux/macOS 使用 Bash；Windows 使用 PowerShell 7，并安装提供兼容 Bash 的 Git for Windows
+- 工具基线：Jujutsu `0.43.0` 的文档命令已验证；更高版本必须在采用时重新完成烟雾测试。Git `2.34.0` 或更高版本。
+- 平台状态：`VERIFIED` 为 Ubuntu GitHub Actions 中的 Bash 入口和 PowerShell 委托入口；`PARTIAL` 为 macOS 与真实 Windows PowerShell 7 + Git for Windows 环境，采用时必须执行平台烟雾测试。
 - 验证入口：
   ```bash
   bash scripts/check.sh
@@ -92,7 +92,7 @@ PowerShell 7 等价入口会委托上述权威命令，不维护第二套验证�
 pwsh -NoProfile -File scripts/check.ps1
 ```
 
-验证失败时必须修正并重跑，不得把失败或未验证状态表述为成功。
+验证失败时必须修正并重跑，不得把失败或未验证状态表述为成功。对于标记为 `PARTIAL` 的平台，必须在真实目标环境完成采用烟雾测试后，才能将该平台表述为已验证。
 
 ## Agent 自审
 
