@@ -13,6 +13,22 @@ FAILED=0
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_DIR" || exit 1
 
+if ! command -v git >/dev/null 2>&1; then
+    echo "ERROR: Git is required for technical validation." >&2
+    exit 1
+fi
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "ERROR: technical validation must run inside a Git worktree." >&2
+    exit 1
+fi
+
+SHELL_FILES="$(mktemp)" || exit 1
+trap 'rm -f "$SHELL_FILES"' EXIT
+if ! git ls-files -z -- '*.sh' >"$SHELL_FILES"; then
+    echo "ERROR: unable to enumerate tracked Shell scripts." >&2
+    exit 1
+fi
+
 PYTHON=""
 if python3 -c "import sys" >/dev/null 2>&1; then
     PYTHON="python3"
@@ -40,29 +56,24 @@ echo "--- Check 2: Committed Shell script modes ---"
 MODE_ERRORS=0
 CHECK_REV="HEAD"
 
-if ! command -v git >/dev/null 2>&1; then
-    echo "  UNAVAILABLE: Git is required for Shell mode validation."
-    MODE_ERRORS=$((MODE_ERRORS + 1))
-else
-    if command -v jj >/dev/null 2>&1; then
-        jj_revision=$(jj log -r @ --no-graph -T 'commit_id' 2>/dev/null || true)
-        if [ -n "$jj_revision" ] && git cat-file -e "${jj_revision}^{commit}" 2>/dev/null; then
-            CHECK_REV="$jj_revision"
-        fi
+if command -v jj >/dev/null 2>&1; then
+    jj_revision=$(jj log -r @ --no-graph -T 'commit_id' 2>/dev/null || true)
+    if [ -n "$jj_revision" ] && git cat-file -e "${jj_revision}^{commit}" 2>/dev/null; then
+        CHECK_REV="$jj_revision"
     fi
-
-    while IFS= read -r -d '' shell_file; do
-        shell_file=${shell_file#./}
-        mode=$(git ls-tree "$CHECK_REV" -- "$shell_file" 2>/dev/null | awk '{print $1}')
-        if [ -z "$mode" ]; then
-            echo "  NOT TRACKED: $shell_file (revision $CHECK_REV)"
-            MODE_ERRORS=$((MODE_ERRORS + 1))
-        elif [ "$mode" != "100755" ]; then
-            echo "  NOT EXECUTABLE: $shell_file (mode $mode, expected 100755)"
-            MODE_ERRORS=$((MODE_ERRORS + 1))
-        fi
-    done < <(git ls-files -z -- '*.sh')
 fi
+
+while IFS= read -r -d '' shell_file; do
+    shell_file=${shell_file#./}
+    mode=$(git ls-tree "$CHECK_REV" -- "$shell_file" 2>/dev/null | awk '{print $1}')
+    if [ -z "$mode" ]; then
+        echo "  NOT TRACKED: $shell_file (revision $CHECK_REV)"
+        MODE_ERRORS=$((MODE_ERRORS + 1))
+    elif [ "$mode" != "100755" ]; then
+        echo "  NOT EXECUTABLE: $shell_file (mode $mode, expected 100755)"
+        MODE_ERRORS=$((MODE_ERRORS + 1))
+    fi
+done <"$SHELL_FILES"
 
 if [ "$MODE_ERRORS" -eq 0 ]; then
     echo "  All Shell scripts are committed as 100755."
@@ -105,7 +116,7 @@ while IFS= read -r -d '' shell_file; do
         echo "  SHELL SYNTAX ERROR: $shell_file"
         SHELL_ERRORS=$((SHELL_ERRORS + 1))
     fi
-done < <(git ls-files -z -- '*.sh')
+done <"$SHELL_FILES"
 
 if [ "$SHELL_ERRORS" -eq 0 ]; then
     echo "  All Shell scripts pass syntax validation."
