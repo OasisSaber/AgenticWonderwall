@@ -30,6 +30,12 @@ jj bookmark create codex/task-<short-name> -r @
 bash scripts/check.sh
 ```
 
+Windows 与 PowerShell 7 等价入口：
+
+```powershell
+pwsh -NoProfile -File scripts/check.ps1
+```
+
 push 前运行：
 
 ```bash

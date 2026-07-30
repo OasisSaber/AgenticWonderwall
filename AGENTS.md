@@ -72,6 +72,12 @@ Agent 可在已记录范围内修改文件、运行验证、设置 bookmark、pu
 bash scripts/check.sh
 ```
 
+PowerShell 7 等价入口会委托上述权威命令，不维护第二套验证规则：
+
+```powershell
+pwsh -NoProfile -File scripts/check.ps1
+```
+
 验证失败时必须修正并重跑，不得把失败或未验证状态表述为成功。
 
 ## Agent 自审

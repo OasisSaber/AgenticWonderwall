@@ -40,24 +40,29 @@ echo "--- Check 2: Committed Shell script modes ---"
 MODE_ERRORS=0
 CHECK_REV="HEAD"
 
-if command -v jj >/dev/null 2>&1; then
-    jj_revision=$(jj log -r @ --no-graph -T 'commit_id' 2>/dev/null || true)
-    if [ -n "$jj_revision" ] && git cat-file -e "${jj_revision}^{commit}" 2>/dev/null; then
-        CHECK_REV="$jj_revision"
+if ! command -v git >/dev/null 2>&1; then
+    echo "  UNAVAILABLE: Git is required for Shell mode validation."
+    MODE_ERRORS=$((MODE_ERRORS + 1))
+else
+    if command -v jj >/dev/null 2>&1; then
+        jj_revision=$(jj log -r @ --no-graph -T 'commit_id' 2>/dev/null || true)
+        if [ -n "$jj_revision" ] && git cat-file -e "${jj_revision}^{commit}" 2>/dev/null; then
+            CHECK_REV="$jj_revision"
+        fi
     fi
-fi
 
-while IFS= read -r -d '' shell_file; do
-    shell_file=${shell_file#./}
-    mode=$(git ls-tree "$CHECK_REV" -- "$shell_file" 2>/dev/null | awk '{print $1}')
-    if [ -z "$mode" ]; then
-        echo "  NOT TRACKED: $shell_file (revision $CHECK_REV)"
-        MODE_ERRORS=$((MODE_ERRORS + 1))
-    elif [ "$mode" != "100755" ]; then
-        echo "  NOT EXECUTABLE: $shell_file (mode $mode, expected 100755)"
-        MODE_ERRORS=$((MODE_ERRORS + 1))
-    fi
-done < <(git ls-files -z -- '*.sh')
+    while IFS= read -r -d '' shell_file; do
+        shell_file=${shell_file#./}
+        mode=$(git ls-tree "$CHECK_REV" -- "$shell_file" 2>/dev/null | awk '{print $1}')
+        if [ -z "$mode" ]; then
+            echo "  NOT TRACKED: $shell_file (revision $CHECK_REV)"
+            MODE_ERRORS=$((MODE_ERRORS + 1))
+        elif [ "$mode" != "100755" ]; then
+            echo "  NOT EXECUTABLE: $shell_file (mode $mode, expected 100755)"
+            MODE_ERRORS=$((MODE_ERRORS + 1))
+        fi
+    done < <(git ls-files -z -- '*.sh')
+fi
 
 if [ "$MODE_ERRORS" -eq 0 ]; then
     echo "  All Shell scripts are committed as 100755."
