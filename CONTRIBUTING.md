@@ -194,3 +194,15 @@ Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://doc
 ## 可选依赖任务路径
 
 默认保持一次只推进一个任务。只有 Issue 明确声明有序依赖链时，才使用[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)；该路径不会改变每任务独立 change、bookmark、PR、验证与人工合并边界。
+
+## 中央接口变更
+
+本仓库同时维护治理规范与[中央 Actions 接口](docs/actions-interface.md)。中央接口变更视为公共 API 变更，`v1` 生命周期内不得移动工作流路径、删除或重命名输入、更改默认项目验证入口、更改 required check 公共名称、新增 Secret 或写权限。
+
+修改公共接口前必须：
+
+1. 对照 [docs/actions-interface.md](docs/actions-interface.md) 判断变更是否破坏 `v1` 承诺；破坏性调整只允许在下一主版本进行；
+2. 判断版本处理：不改变通过/失败结果的修复为 patch；新增可选输入或非阻断诊断为 minor；新增会让现有消费者失败的规则或重命名工作流、Job、输入、PR 字段为下一主版本；新增权限、Secret 或部署行为需要单独安全审查；
+3. 在独立[消费者 smoke 仓库](docs/release-channels.md)完成真实调用验证后再发布；
+4. Release tag 由人类创建为不可变 annotated tag；`v1` 分支由人类快进到已发布并验证的 Release commit，禁止 force push、删除、Agent 凭据更新或直接在 `v1` 开发；
+5. Agent 不得自行创建 Release、推进 `v1` 或修改 GitHub Ruleset。

@@ -12,9 +12,60 @@
 
 ## 选择采用范围
 
-### 完整模板采用
+### 中央调用模式（推荐）
 
-推荐使用 GitHub Template Repository。最低维护集合包括：
+业务仓库保留自己的项目验证入口，通过可重用工作流调用 AW 中央治理检查，
+不再复制中央 CI 实现。最低文件集：
+
+```text
+AGENTS.md
+scripts/check.sh
+.github/pull_request_template.md
+.github/workflows/check.yml
+```
+
+其中 `.github/workflows/check.yml` 是薄调用器：
+
+```yaml
+name: Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened, synchronize]
+
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check
+    permissions:
+      contents: read
+    uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+    with:
+      project-check-path: scripts/check.sh
+```
+
+AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用约束、并发与超时；
+业务仓库负责自己的依赖安装、lint、typecheck、test、build 与其他项目专属
+验证，并通过项目内 `scripts/check.sh` 暴露。接口契约与版本通道见
+[docs/actions-interface.md](actions-interface.md) 与
+[docs/release-channels.md](release-channels.md)。
+
+项目验证脚本必须：非交互；失败时返回非零状态；不依赖本机绝对路径；不读取
+未声明的 Secret；不执行部署、发布或远端修改；能在全新 checkout 中运行；
+输出足以定位错误的日志。
+
+### 完整模板采用（兼容）
+
+兼容路径：复制模板文件后本地维护 CI。推荐使用 GitHub Template Repository。
+最低维护集合包括：
 
 - 根部 `AGENTS.md` 与 `CONTRIBUTING.md`；
 - 根部 `.ai-contributors.yaml` 与 `scripts/ai_contributors.py`（AI Contributor 身份配置与 trailer 工具，规则引用见 [docs/ai-contributors.md](ai-contributors.md)）；
@@ -22,7 +73,7 @@
 - `scripts/` 中的权威验证入口、共享验证组件、依赖文件和测试；
 - `docs/` 中被采用规则引用的支持文档。
 
-采用者可以删除明确不需要的可选路径，但删除前必须同步移除所有指向该入口的规则和链接，避免留下不存在的验证命令或支持文档。
+采用者可以删除明确不需要的可选路径，但删除前必须同步移除所有指向该入口的规则和链接，避免留下不存在的验证命令或支持文档。复制模式需要自行维护 CI 实现与上游接口的一致性，不享受中央治理与版本化发布。
 
 ### 仅采用 `AGENTS.md`
 
@@ -73,7 +124,7 @@ skill 是自包含的便携汇总，不替代采用项目自身的规则文件�
    ```
 
 3. 填写根部 `AGENTS.md` 的“项目事实”，包括项目目标、技术栈、默认分支和验证命令。
-4. 按项目实际需要替换权威入口 `scripts/check.sh`、共享技术组件 `scripts/validate.sh` 与持续集成配置；需要 Windows 入口时保留委托同一权威命令的 `scripts/check.ps1`，并由人类按 [仓库设置说明](repository-settings.md) 配置 GitHub 保护。
+4. 按项目实际需要编写权威入口 `scripts/check.sh`，通过中央调用模式调用 AW 可重用工作流；需要 Windows 入口时保留委托同一权威命令的 `scripts/check.ps1`，并由人类按 [仓库设置说明](repository-settings.md) 配置 GitHub 保护。
 5. 开始每个新任务前运行 `jj git fetch` 同步远端基线；之后才能使用 `jj status`、`jj new` 和 bookmark 命令。
 6. 保留一个通用规则入口，避免建立第二套相互冲突的通用规则。
 7. 完成一次低风险端到端演练：明确任务边界、创建一个 jj change、验证、自审、创建 Pull Request，再由人类决定是否 Squash Merge。
@@ -103,7 +154,7 @@ skill 是自包含的便携汇总，不替代采用项目自身的规则文件�
 ## 已有项目
 
 1. 盘点现有 Agent 规则、分支保护、权限、安全、测试和交付约束。
-2. 选择完整模板采用或仅采用 `AGENTS.md`，并按“选择采用范围”完成对应定制。
+2. 优先迁移到[中央调用模式](#中央调用模式推荐)：保留项目 `scripts/check.sh`，把 CI 替换为调用 AW reusable workflow 的薄调用器；或选择完整模板采用 / 仅采用 `AGENTS.md`，并按“选择采用范围”完成对应定制。
 3. 保留项目自身的架构、安全、测试和交付资料，并按照 `AGENTS.md` 的权威顺序引用它们。
 4. 合并或移除重复的通用规则，避免不同文件同时声明最高权威。
 5. 根据现有技术栈配置验证脚本与持续集成，然后完成低风险演练。
@@ -114,7 +165,7 @@ skill 是自包含的便携汇总，不替代采用项目自身的规则文件�
 
 ```markdown
 来源: AgenticWonderwall <release-tag-or-full-commit-sha>
-采用范围: <完整模板 / 仅 AGENTS.md / 仅 skill / 自定义文件集合>
+采用范围: <中央调用 / 完整模板 / 仅 AGENTS.md / 仅 skill / 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>
 Jujutsu 版本: <jj --version>

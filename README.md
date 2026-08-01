@@ -2,9 +2,9 @@
 
 A minimal single-Agent workflow for GitHub and Jujutsu.
 
-AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Flow 与 Jujutsu 的轻量适配层，也是可复制的规则模板与稳定版本接口。
+AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治理规范，并提供集中维护、版本化发布的 GitHub Actions 可重用工作流接口。
 
-它不是 Agent 服务、多 Agent 编排平台、Web 或 API 服务、CLI 产品、Agent 运行时、自动发布机器人或项目管理系统。
+它不是 Agent 服务、多 Agent 编排平台、Web 或 API 服务、CLI 产品、Agent 运行时、自动发布机器人、项目管理系统；不自动 merge 或 release。
 
 ## 稳定接口
 
@@ -16,6 +16,8 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
 | 完整任务生命周期 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 验证入口 | `bash scripts/check.sh` |
+| Actions 接口 | [docs/actions-interface.md](docs/actions-interface.md) |
+| 版本通道 | [docs/release-channels.md](docs/release-channels.md) |
 | AI Contributor 配置 | [.ai-contributors.yaml](.ai-contributors.yaml) |
 | AI Contributor 说明 | [docs/ai-contributors.md](docs/ai-contributors.md) |
 | 复制接口 | GitHub Template Repository |
@@ -100,6 +102,27 @@ pwsh -NoProfile -File scripts/check.ps1
 当前 GitHub Actions 在 Ubuntu 上同时运行上述 Bash 和 PowerShell 委托入口。真实 Windows 与 macOS 支持状态为 `PARTIAL`，采用者必须在目标平台完成[新仓库烟雾测试](docs/adoption-guide.md#新仓库烟雾测试)后再声明为已验证。
 
 验证入口检查 Python 语法、Pull Request 正文校验器单元测试，以及 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
+
+## 中央 Actions 接口
+
+业务仓库通过可重用工作流调用中央治理检查，不再复制 AW 的 CI 实现：
+
+```yaml
+jobs:
+  check:
+    name: check
+    permissions:
+      contents: read
+    uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+    with:
+      project-check-path: scripts/check.sh
+```
+
+AW 负责工作流治理、PR 合规检查、安全基线与调用约束；业务仓库负责自己的
+依赖安装、lint、typecheck、test、build 等专属验证，并通过项目内
+`scripts/check.sh` 暴露。接口契约见
+[docs/actions-interface.md](docs/actions-interface.md)，版本通道见
+[docs/release-channels.md](docs/release-channels.md)。
 
 ## AI Contributors
 
