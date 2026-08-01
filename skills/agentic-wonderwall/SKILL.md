@@ -119,6 +119,30 @@ gh pr create --draft --base main --head <task-bookmark>
 - Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、
   已知限制和未覆盖内容。
 
+## AI Contributors 标注
+
+AI Agent/模型对本次变更产生实质贡献时，把它记录为共同作者，人类用户保持
+主要 commit author：
+
+- 身份在项目根部 `.ai-contributors.yaml` 配置：每个模型使用独立 id，
+  display_name 与 email 用于生成 `Co-authored-by` trailer，aliases 提供
+  命令行别名且不得与任何模型 id、display name 或其他模型别名冲突；
+- 使用 `python scripts/ai_contributors.py generate <model|alias>...` 生成
+  去重的 trailer，写入提交信息前必须经人类确认；提交信息保留一个空行后按行
+  追加，不覆盖用户已有的其他 trailers；
+- 未配置可关联邮箱的模型生成时直接失败并提示配置用户自建 Bot/Agent 账户
+  的 no-reply 邮箱，不静默伪造 GitHub 账户；
+- 只标注对代码、文档、测试、设计或审查产生实质影响的模型；仅被调用过、
+  输出未被采用或只提供无关建议的模型不得标注；
+- Squash Merge 场景：PR 描述中汇总 AI Contributors 的 `Co-authored-by` 行，
+  合并后最终提交仍保留这些 trailer；
+- 校验：`python scripts/ai_contributors.py check` 检查配置文件，
+  `validate <file>` 检查提交信息或 PR 正文中的 trailer 格式、空邮箱、占位符
+  邮箱、重复 Contributor 与未注册模型；
+- GitHub 根据邮箱关联 Contributor 账户，名称本身不会创建账户；没有对应
+  GitHub 账户的邮箱只显示文本署名，Contributors 图表只统计最终进入默认分支
+  的提交且刷新存在延迟。
+
 ## Agent 自审
 
 创建或更新 Pull Request 前必须：

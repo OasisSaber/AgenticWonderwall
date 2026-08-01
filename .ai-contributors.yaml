@@ -1,0 +1,23 @@
+# AI Contributor 身份配置
+#
+# 每个模型一条身份记录，id 是唯一标识，aliases 提供可用别名。
+# display_name 与 email 用于生成 Co-authored-by trailer。
+# 邮箱必须能关联 GitHub 账户；没有官方 GitHub 账户的模型
+# （如 DeepSeek）应填写用户自建 Bot/Agent 账户的 no-reply 邮箱，
+# 未配置邮箱时生成 trailer 会失败并给出明确提示。
+
+ai_contributors:
+  codex:
+    display_name: Codex
+    email: codex@users.noreply.github.com
+    aliases: [gpt, openai, gpt-5.6]
+
+  claude:
+    display_name: Claude
+    email: noreply@anthropic.com
+    aliases: [anthropic, claude-code]
+
+  deepseek:
+    display_name: DeepSeek
+    email: ""
+    aliases: [ds, deepseek-v4]

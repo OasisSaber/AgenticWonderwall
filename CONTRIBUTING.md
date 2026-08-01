@@ -107,7 +107,7 @@ jj git fetch --remote origin
 gh pr create --draft --base main --head <task-bookmark>
 ```
 
-Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得自行 merge 或 release。
+Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。变更中有 AI Agent/模型实质参与时，按 [AGENTS.md](AGENTS.md) 的 AI Contributors 规则生成 `Co-authored-by` trailer 并汇总到 PR 描述，人类保持主要 commit author。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得自行 merge 或 release。
 
 同一 bookmark 再次 push 会更新现有 Pull Request。首次 push 后，change 已属于已发布历史；任何 restack 或内容更新都必须先取得明确人类授权，然后重新运行完整验证、阅读完整 diff，并再次 push 同一 bookmark。
 
