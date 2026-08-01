@@ -10,7 +10,7 @@
 
 ## 支持状态
 
-- `VERIFIED`：当前 Ubuntu GitHub Actions 中直接运行 `scripts/check.sh`，并通过 PowerShell 7 调用 `scripts/check.ps1` 委托同一 Bash 入口。
+- `VERIFIED`：当前 Ubuntu GitHub Actions 中直接运行 `scripts/check.sh`（经中央 reusable workflow `aw-check.yml`，check-run 名称 `aw-check / check`）。
 - `PARTIAL`：真实 Windows PowerShell 7 + Git for Windows 与 macOS Bash。仓库提供入口，但当前 CI 不在这些原生平台运行；采用者必须在目标平台完成烟雾测试。
 - Windows PowerShell 5.1 不在支持范围内。
 
