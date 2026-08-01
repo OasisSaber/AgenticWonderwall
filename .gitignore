@@ -1,0 +1,9 @@
+# Reasonix desktop session metadata
+.reasonix/
+
+# Python caches
+__pycache__/
+.pytest_cache/
+
+# Jujutsu internals
+.jj/
