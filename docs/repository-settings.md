@@ -25,3 +25,7 @@ reusable workflow 在 GitHub UI 中最终显示的名称不能假定为纯 `chec
 3. 创建测试 PR，确认新旧检查均满足；
 4. 移除旧 required check；
 5. 最后删除旧 CI 实现（AW 仓库 `.github/workflows/check.yml` 中过渡期的旧 `check` job）。
+
+### 迁移进度记录
+
+- 2026-08-02：规则集 `Protect main` 已加入 `aw-check / check`（步骤 2 完成，新旧检查并存）；本 PR 为步骤 3 的测试 PR，用于确认新旧检查均满足后再由人类执行步骤 4（移除旧 `check`）。
