@@ -50,3 +50,14 @@ python scripts/ai_contributors.py validate - < pr-body.txt
 未配置可关联邮箱的模型（如 DeepSeek）生成时直接失败并提示配置自建 Bot/Agent
 账户邮箱，不静默伪造 GitHub 账户。说明见
 [docs/ai-contributors.md](../docs/ai-contributors.md)。
+
+## 消费者契约
+
+`scripts/validate_consumer.py` 机械验证中央 Actions 接口调用方的最小采用契约：
+仓库根目录存在、根部 `AGENTS.md` 存在、`project-check-path` 为不含反斜杠与
+`..` 的 POSIX 相对路径、目标是受 Git 跟踪的普通文件且不是符号链接。契约定义
+见 [docs/actions-interface.md](../docs/actions-interface.md)。
+
+```bash
+python scripts/validate_consumer.py <repository-root> <project-check-path>
+```
