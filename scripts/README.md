@@ -61,3 +61,11 @@ python scripts/ai_contributors.py validate - < pr-body.txt
 ```bash
 python scripts/validate_consumer.py <repository-root> <project-check-path>
 ```
+
+## Actions 契约
+
+`scripts/test_actions_contract.py` 机械验证中央 reusable workflow
+`.github/workflows/aw-check.yml`：`workflow_call` 触发、Job 名称为 `check`、
+只读权限、无 `pull_request_target` 与 Secrets、第三方 Action 固定完整 SHA、
+默认输入、超时上限与检出路径。契约定义见
+[docs/actions-interface.md](../docs/actions-interface.md)。
