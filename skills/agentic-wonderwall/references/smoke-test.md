@@ -65,7 +65,7 @@
 
 ```markdown
 来源: AgenticWonderwall <release-tag-or-full-commit-sha>
-采用范围: <完整模板 / 仅 AGENTS.md / 自定义文件集合 / 仅 skill>
+采用范围: <完整模板 / 仅 AGENTS.md / 仅 skill / 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>
 Jujutsu 版本: <jj --version>
