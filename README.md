@@ -18,6 +18,7 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 | 验证入口 | `bash scripts/check.sh` |
 | Actions 接口 | [docs/actions-interface.md](docs/actions-interface.md) |
 | 版本通道 | [docs/release-channels.md](docs/release-channels.md) |
+| 更新指南 | [docs/update-guide.md](docs/update-guide.md) |
 | AI Contributor 配置 | [.ai-contributors.yaml](.ai-contributors.yaml) |
 | AI Contributor 说明 | [docs/ai-contributors.md](docs/ai-contributors.md) |
 | 复制接口 | GitHub Template Repository |
@@ -46,6 +47,10 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工保留操作）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。
 
 所有采用方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
+
+已采用仓库的模板内容（skill、规则文件、脚本）不会自动同步；复制
+`scripts/aw-update.sh` 后，加载 `agentic-wonderwall` skill 会自动检查上游
+新版本并引导更新，流程见[更新指南](docs/update-guide.md)。
 
 ## 快速开始
 
