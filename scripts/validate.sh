@@ -97,6 +97,19 @@ else
             YAML_ERRORS=$((YAML_ERRORS + 1))
         fi
     done < <(find . -type d \( -name '.git' -o -name '.jj' -o -name 'node_modules' -o -name '.venv' -o -name 'venv' -o -name '.cache' -o -name '__pycache__' \) -prune -o -type f \( -name '*.yml' -o -name '*.yaml' \) -print0)
+    while IFS= read -r -d '' skill_file; do
+        if ! "$PYTHON" -c 'import pathlib, sys, yaml
+lines = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()
+if not lines or lines[0] != "---":
+    raise SystemExit(1)
+end = next((i for i, line in enumerate(lines[1:], 1) if line == "---"), None)
+if end is None:
+    raise SystemExit(1)
+yaml.safe_load("\n".join(lines[1:end]))' "$skill_file" 2>/dev/null; then
+            echo "  YAML ERROR: $skill_file (frontmatter)"
+            YAML_ERRORS=$((YAML_ERRORS + 1))
+        fi
+    done < <(find . -type d \( -name '.git' -o -name '.jj' -o -name 'node_modules' -o -name '.venv' -o -name 'venv' -o -name '.cache' -o -name '__pycache__' \) -prune -o -type f -name 'SKILL.md' -print0)
 fi
 
 if [ "$YAML_ERRORS" -eq 0 ]; then
