@@ -14,6 +14,10 @@
 - 默认远端名为 `origin`、受保护分支为 `main`。采用项目使用其他名称时必须
   统一替换。
 
+> Windows PowerShell 转义提示：命令示例为 Bash 风格。PowerShell 中 `@`
+> 是自动变量展开符，`jj bookmark create <name> -r @` 会解析失败；照抄时把
+> 参数写成引号形式：`-r '@'`。Bash 中两种写法均可。
+
 采用前运行 `jj --version` 与 `git --version`，把真实版本、操作系统和验证状态
 记录在演练结果中。不得仅因仓库提供入口就把 `PARTIAL` 平台表述为已验证。
 

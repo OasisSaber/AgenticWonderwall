@@ -155,7 +155,9 @@ Agent 不得自行 merge、release、删除远端数据、执行破坏性操作�
 - rebase 产生文件冲突（`jj resolve --list` 非空时不得视为可验证或可发布）；
 - 远端 bookmark 与最后一次 fetch 不一致；
 - 需要重写已发布历史但没有明确人类授权；
-- 实现需要扩大 Issue 范围。
+- 实现需要扩大 Issue 范围；
+- 远端不存在、未配置或与预期不符（`jj git remote list` 为空，或路径与项目
+  文档不一致）：停止并请求人类确认远端路径，不得自行创建、猜测或连接远端。
 
 ## 安全与卫生
 
@@ -172,3 +174,7 @@ Agent 不得自行 merge、release、删除远端数据、执行破坏性操作�
 “项目事实”（项目目标、技术栈、默认分支、验证命令）、由人类配置 GitHub 保护
 规则，并完成一次端到端烟雾测试。详细清单见
 [references/smoke-test.md](references/smoke-test.md)。
+
+若 skill 目录位于 Jujutsu 工作区内（如 `.agents/skills/`），这些文件会被 jj
+快照进工作区 change 并显示为未提交修改；这是正常现象，可以接受，或由人类
+把该目录加入忽略规则。

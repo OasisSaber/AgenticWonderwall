@@ -4,6 +4,10 @@
 命令已在 Jujutsu `0.43.0` 上核对；更高版本必须在采用时重新完成烟雾测试。
 文档假设默认分支为 `main`、远端为 `origin`；采用项目使用其他名称时应一致替换。
 
+> Windows PowerShell 转义提示：本文件命令为 Bash 风格。PowerShell 中 `@`
+> 是自动变量展开符，`jj bookmark create <name> -r @` 会解析失败；照抄时把
+> 参数写成引号形式：`-r '@'`。Bash 中两种写法均可。
+
 ## 初始化
 
 ```bash
