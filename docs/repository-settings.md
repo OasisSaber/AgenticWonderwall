@@ -16,10 +16,12 @@ GitHub Template Repository 只复制仓库文件，不能保证这些服务器�
 
 reusable workflow 在 GitHub UI 中最终显示的名称不能假定为纯 `check`。迁移 required check 时，先在独立消费者 smoke 仓库运行新工作流并记录真实 check-run 名称，然后按以下顺序由人类执行：
 
+真实 check-run 名称：**`aw-check / check`**（已在消费者 smoke 仓库 `OasisSaber/AgenticWonderwall-consumer-smoke` 经真实运行验证，结论 success；Issue 4/7 汇报见 AW Issue #45）。
+
+迁移顺序（人类执行）：
+
 1. 现有 Ruleset 暂时保留旧 required check，过渡期同时运行旧检查与新检查；
-2. 将新检查加入 required checks；
+2. 将 `aw-check / check` 加入 required checks；
 3. 创建测试 PR，确认新旧检查均满足；
 4. 移除旧 required check；
-5. 最后删除旧 CI 实现。
-
-真实 check-run 名称必须写入本文档。
+5. 最后删除旧 CI 实现（AW 仓库 `.github/workflows/check.yml` 中过渡期的旧 `check` job）。
