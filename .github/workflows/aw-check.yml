@@ -1,0 +1,111 @@
+name: AgenticWonderwall Check
+
+on:
+  workflow_call:
+    inputs:
+      project-check-path:
+        description: Relative path to the caller repository validation entrypoint
+        required: false
+        type: string
+        default: scripts/check.sh
+
+      policy-ref:
+        description: AgenticWonderwall ref used for policy implementation
+        required: false
+        type: string
+        default: v1
+
+permissions:
+  contents: read # Required only for checkout; PR data comes from the event payload.
+
+concurrency:
+  group: aw-check-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: project
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout AgenticWonderwall policy
+        if: github.repository != 'OasisSaber/AgenticWonderwall'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: OasisSaber/AgenticWonderwall
+          ref: ${{ inputs.policy-ref }}
+          path: .agentic-wonderwall
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Select policy source
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_REPOSITORY" == "OasisSaber/AgenticWonderwall" ]]; then
+            echo "POLICY_DIR=$GITHUB_WORKSPACE/project" >> "$GITHUB_ENV"
+          else
+            echo "POLICY_DIR=$GITHUB_WORKSPACE/.agentic-wonderwall" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12.7'
+
+      - name: Install policy dependencies
+        shell: bash
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            -r "$POLICY_DIR/scripts/requirements.txt"
+
+      - name: Validate consumer contract
+        shell: bash
+        env:
+          PROJECT_CHECK_PATH: ${{ inputs.project-check-path }}
+        run: |
+          python "$POLICY_DIR/scripts/validate_consumer.py" \
+            "$GITHUB_WORKSPACE/project" \
+            "$PROJECT_CHECK_PATH"
+
+      - name: Validate Pull Request body
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          python "$POLICY_DIR/scripts/validate_pr_body.py"
+
+      - name: Run project validation
+        shell: bash
+        working-directory: project
+        env:
+          PROJECT_CHECK_PATH: ${{ inputs.project-check-path }}
+        run: |
+          set -euo pipefail
+          bash -- "$PROJECT_CHECK_PATH"
+
+      - name: Write check summary
+        if: always()
+        shell: bash
+        env:
+          PROJECT_CHECK_PATH: ${{ inputs.project-check-path }}
+          POLICY_REF: ${{ inputs.policy-ref }}
+        run: |
+          {
+            echo "## AgenticWonderwall"
+            echo
+            echo "- Caller: \`$GITHUB_REPOSITORY\`"
+            echo "- Policy ref: \`$POLICY_REF\`"
+            echo "- Project check: \`$PROJECT_CHECK_PATH\`"
+          } >> "$GITHUB_STEP_SUMMARY"
