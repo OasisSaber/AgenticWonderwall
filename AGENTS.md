@@ -6,7 +6,9 @@
 ## 项目事实
 
 - 项目名：AgenticWonderwall
-- 项目目标：维护面向个人开发者的单 Agent GitHub Flow + Jujutsu 工作流模板
+- 项目目标：维护面向个人开发者的单 Agent GitHub Flow + Jujutsu 工作流模板，并集中维护、版本化发布 GitHub Actions 可重用工作流接口
+- 中央 Actions 接口：`OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml`，业务仓库通过 `uses ... @v1` 调用，调用约束见 [docs/actions-interface.md](docs/actions-interface.md)，版本通道见 [docs/release-channels.md](docs/release-channels.md)
+- 接口承诺：`v1` 生命周期内不得移动工作流路径、删除或重命名输入、更改默认项目验证入口、更改 required check 公共名称、新增 Secret 或写权限；中央接口变更视为公共 API 变更，破坏性调整只允许在下一主版本进行
 - 默认分支：`main`
 - 工具基线：Jujutsu `0.43.0` 的文档命令已验证；更高版本必须在采用时重新完成烟雾测试。Git `2.34.0` 或更高版本。
 - 平台状态：`VERIFIED` 为 Ubuntu GitHub Actions 中的 Bash 入口和 PowerShell 委托入口；`PARTIAL` 为 macOS 与真实 Windows PowerShell 7 + Git for Windows 环境，采用时必须执行平台烟雾测试。
@@ -15,6 +17,7 @@
   bash scripts/check.sh
   ```
 - 合并方式：只接受人类决定的 Squash Merge
+- 自动 merge、release、部署与 `v1` 分支推进始终禁止 Agent 执行，只接受人类单独、明确决定
 
 采用到其他项目时，应更新本节中的项目目标、技术栈、验证命令和受保护分支。
 
