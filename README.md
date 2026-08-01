@@ -37,7 +37,11 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 
 可以只摘取根部 `AGENTS.md`，但它不是无需修改即可独立运行的配置文件。采用者必须先替换“项目事实”和验证命令，并删除或替换没有一并复制的仓库内链接、PowerShell 入口和可选依赖任务路径。不得把不存在的 `scripts/check.sh` 或支持文档继续声明为有效入口。
 
-两种方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
+### 仅采用工作流 skill
+
+可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工保留操作）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。
+
+所有采用方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
 
 ## 快速开始
 

@@ -32,6 +32,18 @@
 3. 删除不采用的可选依赖任务路径，或一并复制并维护其支持文档；
 4. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
 
+### 仅采用工作流 skill
+
+可以只复制仓库根部的 `skills/agentic-wonderwall/` 目录（`SKILL.md` 与
+`references/`）到采用项目的 skill 目录。加载该 skill 即可获得完整工作流指导：
+任务路径、jj change 与 bookmark 生命周期、验证入口、PR 流程、审查意见用语、
+人工保留操作与停止条件，详见 [skills/agentic-wonderwall/SKILL.md](../skills/agentic-wonderwall/SKILL.md)。
+
+skill 是自包含的便携汇总，不替代采用项目自身的规则文件，也不构成第二套通用
+规则。采用者仍必须替换项目事实、配置真实验证命令与 GitHub 保护，并按
+[新仓库烟雾测试](#新仓库烟雾测试)完成端到端演练；版本记录中的采用范围填写
+"仅 skill"。
+
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
 
 ## 新项目
