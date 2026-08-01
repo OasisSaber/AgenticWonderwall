@@ -16,6 +16,8 @@ AgenticWonderwall 是面向个人开发者的单 Agent 工作流，是 GitHub Fl
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
 | 完整任务生命周期 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 验证入口 | `bash scripts/check.sh` |
+| AI Contributor 配置 | [.ai-contributors.yaml](.ai-contributors.yaml) |
+| AI Contributor 说明 | [docs/ai-contributors.md](docs/ai-contributors.md) |
 | 复制接口 | GitHub Template Repository |
 | 版本接口 | Git tag / GitHub Release |
 
@@ -98,6 +100,29 @@ pwsh -NoProfile -File scripts/check.ps1
 当前 GitHub Actions 在 Ubuntu 上同时运行上述 Bash 和 PowerShell 委托入口。真实 Windows 与 macOS 支持状态为 `PARTIAL`，采用者必须在目标平台完成[新仓库烟雾测试](docs/adoption-guide.md#新仓库烟雾测试)后再声明为已验证。
 
 验证入口检查 Python 语法、Pull Request 正文校验器单元测试，以及 Markdown 内部链接、Shell 脚本提交模式、YAML 语法和 Shell 语法。依赖说明见 [scripts/README.md](scripts/README.md)。
+
+## AI Contributors
+
+AI Agent/模型对变更产生实质贡献时，把它记录为共同作者，人类用户保持主要
+commit author：
+
+```bash
+python scripts/ai_contributors.py generate codex claude
+```
+
+```text
+Co-authored-by: Codex <codex@users.noreply.github.com>
+Co-authored-by: Claude <noreply@anthropic.com>
+```
+
+身份在 [.ai-contributors.yaml](.ai-contributors.yaml) 配置；未配置可关联邮箱
+的模型（如 DeepSeek）生成时直接失败并提示配置自建 Bot/Agent 账户邮箱，不
+静默伪造 GitHub 账户。生成结果写入提交信息前须经人类确认，并在 PR 描述中
+汇总 `Co-authored-by` 行以兼容 Squash Merge。
+
+GitHub 根据邮箱关联 Contributor 账户，Contributors 图表只统计最终进入默认
+分支的提交且刷新存在延迟；没有对应 GitHub 账户的邮箱只显示文本署名。使用
+示例与限制详见 [docs/ai-contributors.md](docs/ai-contributors.md)。
 
 ## 维护边界
 

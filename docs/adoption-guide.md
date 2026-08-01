@@ -17,6 +17,7 @@
 推荐使用 GitHub Template Repository。最低维护集合包括：
 
 - 根部 `AGENTS.md` 与 `CONTRIBUTING.md`；
+- 根部 `.ai-contributors.yaml` 与 `scripts/ai_contributors.py`（AI Contributor 身份配置与 trailer 工具，规则引用见 [docs/ai-contributors.md](ai-contributors.md)）；
 - `.github/pull_request_template.md`、`.github/workflows/` 与需要的 Issue Form；
 - `scripts/` 中的权威验证入口、共享验证组件、依赖文件和测试；
 - `docs/` 中被采用规则引用的支持文档。
@@ -28,7 +29,7 @@
 只复制根部 `AGENTS.md` 时，应把它视为规则素材而不是可直接运行的完整配置。采用前必须：
 
 1. 替换项目名、目标、技术栈、默认分支和真实验证命令；
-2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1` 与支持文档链接；
+2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1`、`scripts/ai_contributors.py` 与支持文档链接；
 3. 删除不采用的可选依赖任务路径，或一并复制并维护其支持文档；
 4. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
 
