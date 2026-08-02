@@ -1,5 +1,6 @@
 # Reasonix desktop session metadata
 .reasonix/
+reasonix.toml
 
 # Python caches
 __pycache__/

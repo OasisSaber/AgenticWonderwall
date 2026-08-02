@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        此表单用于 `AGENTS.md` 定义的复杂任务路径，只记录任务目标与边界，不改变仓库的权威顺序或人工保留操作。
+        此表单用于 `AGENTS.md` 定义的复杂任务路径，只记录任务目标与边界，不改变仓库的权威顺序或人工批准与聚合授权规则。
 
   - type: textarea
     id: goal

@@ -9,14 +9,16 @@ description: >-
   “Squash Merge”“工作流采用或部署”“更新工作流内容”；或在采用该工作流的
   仓库中开始任何任务、处理冲突、同步 main 基线、创建或更新 Pull Request。
   加载本 skill 即可获得
-  完整工作流指导，无需再查阅其他工作流文档。
+  工作流指导；发布与授权细节按本文件引用的 core/policy.md / profiles/ 加载。
 ---
 
 # AgenticWonderwall 工作流
 
 本 skill 提供 AgenticWonderwall 工作流的完整指导。加载本 skill 后，在采用
 该工作流的项目中执行任务时，按以下规则工作；详细命令见 `references/` 中的
-资源文件。
+资源文件。发布与授权规则以采用项目根部的 `core/policy.md`（聚合授权与发布
+事务）、`profiles/git.md` 与 `profiles/jj.md`（安全执行方式）为权威来源，
+本 skill 负责加载这些规则并只保留必要的摘要，不携带逐步授权规则副本。
 
 ## 工作流是什么
 
@@ -171,11 +173,23 @@ AI Agent/模型对本次变更产生实质贡献时，把它记录为共同作�
 
 每条意见直接说明具体问题、影响和所需修复。
 
-## 人工保留操作
+## 人工批准与聚合授权
 
-Agent 不得自行 merge、release、删除远端数据、执行破坏性操作或扩大范围。
-允许 push 或创建 Pull Request 不等于允许 merge 或 release。这些操作始终需要
-人类单独、明确决定。
+人类保留最终决定权，不表示人类必须亲自操作。Agent 不得未经批准执行 merge、
+release、删除远端数据、破坏性操作或扩大范围；取得人类明确批准后，Agent
+可在批准范围内连续执行，不得把可由自身工具完成的操作转交人类手工执行。
+
+发布采用单一最终授权门：Agent 完成全部只读准备后提交一次完整发布审核
+（含版本号、候选 commit SHA、目标分支与 tag、Release Notes、全部外部写
+操作与顺序、当前验证结果、远端状态与停止条件），人类一次批准完整发布事务，
+Agent 连续执行并完成远端验证。候选 SHA、版本号、目标、Release Notes 或
+操作范围变化时，聚合授权自动失效并重新审核；部分失败时不盲目重试，先核验
+远端状态，需要强推、覆盖或删除时重新取得授权。
+
+完整规则在采用项目根部的 `core/policy.md`（聚合授权与发布事务）、
+`profiles/git.md` 与 `profiles/jj.md`（Git / jj 安全执行方式）；采用项目
+没有这些文件时，以根部 `AGENTS.md` 记录为准。允许 push 或创建 Pull
+Request 不等于允许 merge 或 release。
 
 ## 停止条件
 

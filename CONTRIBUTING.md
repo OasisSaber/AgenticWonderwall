@@ -107,7 +107,7 @@ jj git fetch --remote origin
 gh pr create --draft --base main --head <task-bookmark>
 ```
 
-Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。变更中有 AI Agent/模型实质参与时，按 [AGENTS.md](AGENTS.md) 的 AI Contributors 规则生成 `Co-authored-by` trailer 并汇总到 PR 描述，人类保持主要 commit author。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得自行 merge 或 release。
+Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。变更中有 AI Agent/模型实质参与时，按 [AGENTS.md](AGENTS.md) 的 AI Contributors 规则生成 `Co-authored-by` trailer 并汇总到 PR 描述，人类保持主要 commit author。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得未经批准 merge 或 release。发布（推进稳定分支、创建 tag、创建 Release 等）采用单一最终发布审核：授权语义见 [core/policy.md](core/policy.md)，Git 与 jj 下的安全执行方式见 [profiles/git.md](profiles/git.md) 与 [profiles/jj.md](profiles/jj.md)。
 
 同一 bookmark 再次 push 会更新现有 Pull Request。首次 push 后，change 已属于已发布历史；任何 restack 或内容更新都必须先取得明确人类授权，然后重新运行完整验证、阅读完整 diff，并再次 push 同一 bookmark。
 
@@ -204,5 +204,5 @@ Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://doc
 1. 对照 [docs/actions-interface.md](docs/actions-interface.md) 判断变更是否破坏 `v1` 承诺；破坏性调整只允许在下一主版本进行；
 2. 判断版本处理：不改变通过/失败结果的修复为 patch；新增可选输入或非阻断诊断为 minor；新增会让现有消费者失败的规则或重命名工作流、Job、输入、PR 字段为下一主版本；新增权限、Secret 或部署行为需要单独安全审查；
 3. 在独立[消费者 smoke 仓库](docs/release-channels.md)完成真实调用验证后再发布；
-4. Release tag 由人类创建为不可变 annotated tag；`v1` 分支由人类快进到已发布并验证的 Release commit，禁止 force push、删除、Agent 凭据更新或直接在 `v1` 开发；
-5. Agent 不得自行创建 Release、推进 `v1` 或修改 GitHub Ruleset。
+4. Release tag 经人类批准后创建为不可变 annotated tag；`v1` 分支经人类批准后快进到已发布并验证的 Release commit（批准后可由 Agent 代执行），禁止 force push、删除、Agent 凭据更新或直接在 `v1` 开发；
+5. Agent 未经批准不得创建 Release、推进 `v1` 或修改 GitHub Ruleset。

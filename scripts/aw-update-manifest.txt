@@ -19,6 +19,8 @@ keep .ai-contributors.yaml
 keep .github/workflows/check.yml
 
 # ---- 模板文件（可覆盖） ----
+# 注意：core/ 与 profiles/ 是授权策略模板文件，apply 时会用上游覆盖本地；
+# 采用者若定制了授权规则，应把对应条目改为 keep（见 docs/update-guide.md）。
 sync .github/pull_request_template.md
 sync .github/ISSUE_TEMPLATE/
 sync scripts/ai_contributors.py
@@ -32,6 +34,8 @@ sync scripts/validate.sh
 sync scripts/validate_consumer.py
 sync scripts/validate_markdown_links.py
 sync scripts/validate_pr_body.py
+sync core/
+sync profiles/
 sync skills/agentic-wonderwall/
 sync docs/actions-interface.md
 sync docs/adoption-guide.md
