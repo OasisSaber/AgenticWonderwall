@@ -3,16 +3,11 @@
   "title": "AgenticWonderwall distribution manifest",
   "description": "Describes the files shipped in an AW release package. The manifest does not copy rule bodies; it only declares file responsibilities, ownership and selection.",
   "type": "object",
-  "required": ["schema_version", "distribution_version", "source_commit", "files"],
+  "required": ["schema_version", "distribution_version", "files"],
   "properties": {
     "schema_version": { "const": 1 },
     "distribution_version": { "type": "string", "minLength": 1 },
     "source_repository": { "type": "string" },
-    "source_commit": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{40}$",
-      "description": "Full commit SHA of the release source."
-    },
     "required": {
       "type": "array",
       "items": { "type": "string" }

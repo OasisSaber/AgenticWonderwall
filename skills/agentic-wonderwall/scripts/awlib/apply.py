@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .source import package_manifest, read_package_file
+from .source import Source, package_manifest, read_package_file
 from .util import AwError, read_json, safe_join, sha256_of_block, sha256_of_file, write_bytes_atomic, write_json_atomic
 
 BLOCK_BEGIN = "<!-- AW:BEGIN MANAGED -->"
@@ -260,36 +260,39 @@ def _prepare_sources(plan: dict, package_root: Path | None) -> dict[str, bytes]:
     plan source-hash verification.
     """
     prepared: dict[str, bytes] = {}
+    writable = ("ADD", "UPDATE_SAFE", "BLOCK_PRESENT")
     for op in plan["files"]:
-        if op["classification"] not in ("ADD", "BLOCK_PRESENT"):
+        if op["classification"] not in writable:
             continue
         prepared[op["destination"]] = _read_package_bytes(package_root, op)
     return prepared
 
 
-def apply_adopt(project_root: Path, plan_path: Path, package_root: Path | None = None) -> dict:
+def apply_adopt(project_root: Path, plan_path: Path, source: Source | None = None) -> dict:
     """Apply an adoption plan; returns the applied-file summary.
 
-    Order: validate plan -> validate package matches plan source -> read and
-    verify every source that may be written -> validate every target
-    precondition -> begin writes. A source mismatch therefore fails before
-    the first project write.
+    Order: validate plan -> validate resolver source matches plan source ->
+    read and verify every source that may be written -> validate every
+    target precondition -> begin writes. A source mismatch therefore fails
+    before the first project write.
     """
     plan = read_json(plan_path)
     _validate_plan(plan)
 
-    # Source lock: the package supplied at apply time must be the same
-    # distribution the plan was generated from (version + commit), checked
-    # before any write.
-    if package_root is not None:
-        manifest = package_manifest(package_root)
+    # Source lock: the resolver-supplied source at apply time must match the
+    # plan's recorded identity (repository/version/commit), checked before
+    # any write.
+    package_root: Path | None = None
+    if source is not None:
+        package_root = source.package_root
         plan_source = plan.get("source", {})
         if (
-            manifest.get("distribution_version") != plan_source.get("version")
-            or manifest.get("source_commit") != plan_source.get("commit")
+            source.version != plan_source.get("version")
+            or source.repository != plan_source.get("repository")
+            or source.commit != plan_source.get("commit")
         ):
             raise ApplyError(
-                "package source does not match plan source "
+                "resolver source does not match plan source "
                 f"(plan {plan_source.get('version')}@{plan_source.get('commit')}); refusing to apply"
             )
 
@@ -343,9 +346,22 @@ def apply_adopt(project_root: Path, plan_path: Path, package_root: Path | None =
             raise ApplyError(f"cannot apply classification {classification}")
 
     # Install the executor into .aw/bin (managed-replace, source <self>).
+    written, unchanged = install_executor(project_root, written, unchanged)
+
+    # Only now write state.json.
+    state = _build_state(project_root, plan, written, unchanged)
+    write_json_atomic(project_root / ".aw/state.json", state)
+    return {"written": written, "unchanged": unchanged}
+
+
+def install_executor(project_root: Path, written: list[str], unchanged: list[str]) -> tuple[list[str], list[str]]:
+    """Install (or refresh) the executor into .aw/bin; returns updated lists."""
     bin_root = safe_join(project_root, ".aw/bin")
     executor_files = [("aw.py", "aw.py")]
-    for module in ("__init__.py", "util.py", "manifest.py", "source.py", "inspect.py", "planning.py", "apply.py", "verify.py"):
+    for module in (
+        "__init__.py", "util.py", "manifest.py", "source.py", "inspect.py",
+        "planning.py", "apply.py", "verify.py", "update.py", "doctor.py",
+    ):
         executor_files.append((f"awlib/{module}", f"awlib/{module}"))
     bin_installed = True
     for rel_src, rel_dst in executor_files:
@@ -359,11 +375,7 @@ def apply_adopt(project_root: Path, plan_path: Path, package_root: Path | None =
         written.append(".aw/bin/aw.py")
     else:
         unchanged.append(".aw/bin/aw.py")
-
-    # Only now write state.json.
-    state = _build_state(project_root, plan, written, unchanged)
-    write_json_atomic(project_root / ".aw/state.json", state)
-    return {"written": written, "unchanged": unchanged}
+    return written, unchanged
 
 
 def _build_state(project_root: Path, plan: dict, written: list[str], unchanged: list[str]) -> dict:

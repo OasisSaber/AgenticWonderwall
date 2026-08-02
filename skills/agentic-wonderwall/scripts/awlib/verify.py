@@ -87,7 +87,7 @@ def verify(project_root: Path) -> dict:
     bin_root = project_root / ".aw/bin"
     required_bin = ["aw.py"] + [
         f"awlib/{module}"
-        for module in ("__init__.py", "util.py", "manifest.py", "source.py", "inspect.py", "planning.py", "apply.py", "verify.py")
+        for module in ("__init__.py", "util.py", "manifest.py", "source.py", "inspect.py", "planning.py", "apply.py", "verify.py", "update.py", "doctor.py")
     ]
     for rel in required_bin:
         if not (bin_root / rel).is_file():

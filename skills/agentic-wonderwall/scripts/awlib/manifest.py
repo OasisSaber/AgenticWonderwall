@@ -15,8 +15,9 @@ from .util import AwError, SCHEMA_VERSION, read_json, safe_join
 
 ALLOWED_OWNERSHIPS = ("managed-replace", "managed-block", "generated-if-missing", "project-owned")
 
-REQUIRED_KEYS = ("schema_version", "distribution_version", "source_commit", "files")
+REQUIRED_KEYS = ("schema_version", "distribution_version", "files")
 
+# Full 40-char hex SHA pattern, used by the resolver for commit refs.
 FULL_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -40,8 +41,8 @@ def load_manifest(path: Path) -> dict:
         )
     if not isinstance(data["distribution_version"], str) or not data["distribution_version"]:
         raise ManifestError("manifest distribution_version must be a non-empty string")
-    if not isinstance(data["source_commit"], str) or not FULL_SHA_RE.fullmatch(data["source_commit"]):
-        raise ManifestError("manifest source_commit must be a full 40-char hex SHA")
+    if "source_repository" in data and not isinstance(data["source_repository"], str):
+        raise ManifestError("manifest source_repository must be a string")
     if not isinstance(data["files"], list) or not data["files"]:
         raise ManifestError("manifest files must be a non-empty list")
     validate_files(data["files"])

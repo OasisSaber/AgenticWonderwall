@@ -28,11 +28,18 @@ from awlib.apply import apply_adopt  # noqa: E402
 from awlib.inspect import detect_status, inspect  # noqa: E402
 from awlib.manifest import ManifestError, load_manifest  # noqa: E402
 from awlib.planning import plan_adopt  # noqa: E402
-from awlib.source import read_package_file  # noqa: E402
+from awlib.source import read_package_file, resolve_local  # noqa: E402
 from awlib.util import safe_join, sha256_of_file, write_json_atomic  # noqa: E402
 from awlib.verify import verify  # noqa: E402
 
 PACKAGE_ROOT = REPO_ROOT  # AW repo root contains distribution/
+TEST_COMMIT = "a" * 40
+
+
+class _SourceMixin:
+    def _source(self):
+        return resolve_local(PACKAGE_ROOT, commit=TEST_COMMIT)
+
 
 STATE_JSON = {
     "schema_version": 1,
@@ -210,7 +217,7 @@ class InspectTest(unittest.TestCase):
         self.assertEqual(result["detected_adapter"], "trellis")
 
 
-class AdoptFlowTest(unittest.TestCase):
+class AdoptFlowTest(_SourceMixin, unittest.TestCase):
     """End-to-end adopt against a temp (empty) git repo, real package."""
 
     def setUp(self) -> None:
@@ -226,12 +233,10 @@ class AdoptFlowTest(unittest.TestCase):
         self.tmp.cleanup()
 
     def _plan(self, profile="git", adapter="generic", validation="scripts/check.sh") -> dict:
-        manifest = load_manifest(PACKAGE_ROOT / "distribution" / "manifest.json")
+        source = resolve_local(PACKAGE_ROOT, commit=TEST_COMMIT)
         return plan_adopt(
             self.root,
-            PACKAGE_ROOT,
-            source_version=manifest["distribution_version"],
-            source_commit=manifest["source_commit"],
+            source,
             profile=profile,
             adapter=adapter,
             validation_path=validation,
@@ -251,7 +256,7 @@ class AdoptFlowTest(unittest.TestCase):
         result = None  # apply via the real plan file below
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        applied = apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        applied = apply_adopt(self.root, plan_path, self._source())
         self.assertIn("core/policy.md", applied["written"])
         self.assertIn("AGENTS.md", applied["written"])
         self.assertTrue((self.root / "core/policy.md").is_file())
@@ -267,7 +272,7 @@ class AdoptFlowTest(unittest.TestCase):
         self.assertTrue(report["ok"], report["issues"])
 
         # idempotent second apply: nothing re-written destructively
-        applied2 = apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        applied2 = apply_adopt(self.root, plan_path, self._source())
         self.assertEqual(applied2["written"], [])
         self.assertEqual(applied2["unchanged"], applied["written"])
 
@@ -285,7 +290,7 @@ class AdoptFlowTest(unittest.TestCase):
         self.assertEqual(agents_op["classification"], "BLOCK_PRESENT")
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         text = (self.root / "AGENTS.md").read_text(encoding="utf-8")
         self.assertTrue(text.startswith("PROJECT HEADER"))
         self.assertTrue(text.rstrip("\n").endswith("PROJECT FOOTER"))
@@ -298,7 +303,7 @@ class AdoptFlowTest(unittest.TestCase):
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
         with self.assertRaises(AwError):
-            apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+            apply_adopt(self.root, plan_path, self._source())
         self.assertFalse((self.root / ".aw/state.json").exists())
 
     def test_validation_path_exists_kept(self) -> None:
@@ -309,7 +314,7 @@ class AdoptFlowTest(unittest.TestCase):
         self.assertEqual(check_op["classification"], "EXISTS_KEEP")
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         self.assertEqual(
             (self.root / "scripts/check.sh").read_text(encoding="utf-8"),
             "#!/bin/bash\necho custom\n",
@@ -326,24 +331,17 @@ class AdoptFlowTest(unittest.TestCase):
 
 
     def test_invalid_commit_assertion_fails(self) -> None:
-        """plan-adopt must reject a CLI commit that differs from the manifest."""
-        manifest = load_manifest(PACKAGE_ROOT / "distribution" / "manifest.json")
+        """The resolver must reject a commit that is not a full 40-char SHA."""
         with self.assertRaises(Exception) as ctx:
-            plan_adopt(
-                self.root, PACKAGE_ROOT,
-                source_version=manifest["distribution_version"],
-                source_commit="not-a-sha",
-                profile="git", adapter="generic",
-                validation_path="scripts/check.sh",
-            )
-        self.assertIn("mismatch", str(ctx.exception))
+            resolve_local(PACKAGE_ROOT, commit="not-a-sha")
+        self.assertIn("40-char hex SHA", str(ctx.exception))
 
     def test_block_outside_change_keeps_current(self) -> None:
         """Editing AGENTS.md outside the managed block keeps CURRENT/verify OK."""
         plan = self._plan()
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         # Project content outside the block (project facts section).
         # Use write_bytes to avoid platform newline conversion changing
         # byte-level hashes of the untouched block.
@@ -359,7 +357,7 @@ class AdoptFlowTest(unittest.TestCase):
         plan = self._plan()
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         agents = self.root / "AGENTS.md"
         data = agents.read_bytes()
         agents.write_bytes(data.replace(b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f", b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f\xef\xbc\x88\xe5\xb7\xb2\xe7\xaf\xa1\xe6\x94\xb9\xef\xbc\x89", 1))
@@ -381,7 +379,7 @@ class AdoptFlowTest(unittest.TestCase):
         # Modify the target after planning.
         (self.root / "core/workflow.md").write_text("tampered after plan\n", encoding="utf-8")
         with self.assertRaises(AwError) as ctx:
-            apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+            apply_adopt(self.root, plan_path, self._source())
         self.assertIn("changed since plan", str(ctx.exception))
         self.assertFalse((self.root / ".aw/state.json").exists(), "nothing may be written")
 
@@ -392,10 +390,10 @@ class AdoptFlowTest(unittest.TestCase):
             for sub in ("distribution", "core", "profiles", "adapters"):
                 shutil.copytree(PACKAGE_ROOT / sub, pkg / sub)
             plan = plan_adopt(
-                self.root, pkg,
-                source_version="v2.2.0",
-                source_commit=load_manifest(pkg / "distribution" / "manifest.json")["source_commit"],
-                profile="git", adapter="generic",
+                self.root,
+                resolve_local(pkg, commit=TEST_COMMIT),
+                profile="git",
+                adapter="generic",
                 validation_path="scripts/check.sh",
             )
             plan_path = self.root / ".aw-plan.json"
@@ -403,7 +401,7 @@ class AdoptFlowTest(unittest.TestCase):
             # Tamper with the package source after planning.
             (pkg / "core" / "workflow.md").write_bytes(b"tampered package\n")
             with self.assertRaises(AwError) as ctx:
-                apply_adopt(self.root, plan_path, pkg)
+                apply_adopt(self.root, plan_path, resolve_local(pkg, commit=TEST_COMMIT))
             self.assertIn("source file changed since plan", str(ctx.exception))
             self.assertFalse((self.root / ".aw/state.json").exists())
 
@@ -416,9 +414,7 @@ class AdoptFlowTest(unittest.TestCase):
             manifest = load_manifest(pkg / "distribution" / "manifest.json")
             plan = plan_adopt(
                 self.root,
-                pkg,
-                source_version=manifest["distribution_version"],
-                source_commit=manifest["source_commit"],
+                resolve_local(pkg, commit=TEST_COMMIT),
                 profile="git",
                 adapter="generic",
                 validation_path="scripts/check.sh",
@@ -430,7 +426,7 @@ class AdoptFlowTest(unittest.TestCase):
             # files before detecting this mismatch.
             (pkg / "adapters" / "generic.md").write_bytes(b"tampered later source\n")
             with self.assertRaises(AwError) as ctx:
-                apply_adopt(self.root, plan_path, pkg)
+                apply_adopt(self.root, plan_path, resolve_local(pkg, commit=TEST_COMMIT))
             self.assertIn("source file changed since plan", str(ctx.exception))
             # No project write may have happened.
             self.assertFalse((self.root / "core" / "workflow.md").exists())
@@ -444,9 +440,7 @@ class AdoptFlowTest(unittest.TestCase):
         manifest = load_manifest(PACKAGE_ROOT / "distribution" / "manifest.json")
         plan = plan_adopt(
             self.root,
-            PACKAGE_ROOT,
-            source_version=manifest["distribution_version"],
-            source_commit=manifest["source_commit"],
+            self._source(),
             profile="git",
             adapter="generic",
             validation_path="scripts/check.sh",
@@ -454,7 +448,7 @@ class AdoptFlowTest(unittest.TestCase):
         )
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         workflow = (self.root / ".github" / "workflows" / "check.yml").read_text(encoding="utf-8")
         self.assertEqual(workflow.count('branches: ["master"]'), 2)
         self.assertNotIn("branches: [main]", workflow)
@@ -469,7 +463,7 @@ class AdoptFlowTest(unittest.TestCase):
         self.assertNotIn("scripts/check.sh", dests, "default check.sh must not be installed")
         plan_path = self.root / ".aw-plan.json"
         write_json_atomic(plan_path, plan)
-        apply_adopt(self.root, plan_path, PACKAGE_ROOT)
+        apply_adopt(self.root, plan_path, self._source())
         workflow = (self.root / ".github/workflows/check.yml").read_text(encoding="utf-8")
         self.assertIn('project-check-path: "tools/verify.sh"', workflow)
         self.assertTrue((self.root / "tools/verify.sh").is_file())
@@ -499,7 +493,7 @@ class CliTest(unittest.TestCase):
                 "plan-adopt",
                 "--root", str(self.root),
                 "--source", str(PACKAGE_ROOT),
-                "--commit", manifest["source_commit"],
+                "--commit", TEST_COMMIT,
                 "--profile", "git",
                 "--adapter", "generic",
                 "--validation-path", "scripts/check.sh",
@@ -510,7 +504,7 @@ class CliTest(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertTrue(plan_out.is_file())
         apply_proc = run_aw(
-            ["apply-adopt", "--root", str(self.root), "--plan", str(plan_out), "--source", str(PACKAGE_ROOT)],
+            ["apply-adopt", "--root", str(self.root), "--plan", str(plan_out), "--source", str(PACKAGE_ROOT), "--commit", TEST_COMMIT],
             self.root,
         )
         self.assertEqual(apply_proc.returncode, 0, apply_proc.stderr)
