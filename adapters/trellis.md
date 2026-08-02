@@ -36,7 +36,7 @@ Plan（brainstorm → prd.md）
 | 自审与交接 | Finish 前检查清单（范围、验证真实性、已知限制） |
 | Pull Request + 人类 Squash Merge | 审查对象 + 人工合并门；Trellis 的 Finish 不替代人工合并决定 |
 | 聚合授权与发布事务 | core/policy.md 原样生效；Trellis 环境下的发布执行仍按 `profiles/git.md`（或采用项目声明的 Profile） |
-| 更新机制（原 aw-update） | 已删除（V3）；采用项目自行同步模板内容 |
+| 更新机制（原 aw-update） | 已删除（v2.1）；采用项目自行同步模板内容 |
 
 ## 3. 使用方式
 
