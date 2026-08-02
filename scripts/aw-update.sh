@@ -74,32 +74,39 @@ ver_cmp() {
 # 解析目标 ref：优先 --ref；--source 模式要求 --ref；否则联网查询最新 tag。
 # 设置 TARGET_REF。返回 0 成功；2 无法确定；3 用法错误。
 resolve_target_ref() {
+    local tags latest t rc
     if [ -n "$OPT_REF" ]; then
         TARGET_REF="$OPT_REF"
-        return 0
-    fi
-    if [ -n "$OPT_SOURCE" ]; then
+    elif [ -n "$OPT_SOURCE" ]; then
         echo "ERROR: --source 模式必须同时指定 --ref。" >&2
         return 3
-    fi
-    local tags latest t rc
-    tags="$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags --refs -- "$OPT_REPO" 'refs/tags/v*' 2>/dev/null | sed 's#.*refs/tags/##')" || true
-    if [ -z "$tags" ]; then
-        echo "ERROR: 无法查询上游 tag（网络不可用？）。可指定 --ref 或使用 --source 离线目录。" >&2
-        return 2
-    fi
-    latest=""
-    while IFS= read -r t; do
-        [ -z "$t" ] && continue
-        if [ -z "$latest" ]; then
-            latest="$t"
-            continue
+    else
+        tags="$(GIT_TERMINAL_PROMPT=0 git ls-remote --tags --refs -- "$OPT_REPO" 'refs/tags/v*' 2>/dev/null | sed 's#.*refs/tags/##')" || true
+        if [ -z "$tags" ]; then
+            echo "ERROR: 无法查询上游 tag（网络不可用？）。可指定 --ref 或使用 --source 离线目录。" >&2
+            return 2
         fi
-        ver_cmp "$t" "$latest"
-        rc=$?
-        [ "$rc" -eq 1 ] && latest="$t"
-    done <<< "$tags"
-    TARGET_REF="$latest"
+        latest=""
+        while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            if [ -z "$latest" ]; then
+                latest="$t"
+                continue
+            fi
+            ver_cmp "$t" "$latest"
+            rc=$?
+            [ "$rc" -eq 1 ] && latest="$t"
+        done <<< "$tags"
+        TARGET_REF="$latest"
+    fi
+    # ref 校验：拒绝含 / 或 .. 的 ref（防拼入缓存路径后 rm -rf 越界；
+    # 也意味着本脚本只接受 vX.Y.Z 这类单段 tag，斜杠 tag 不被支持）
+    case "$TARGET_REF" in
+        */*|*".."*)
+            echo "ERROR: 非法的 ref '$TARGET_REF'（不得包含 / 或 ..）。" >&2
+            return 3
+            ;;
+    esac
     return 0
 }
 
@@ -170,9 +177,16 @@ parse_manifest() {
 # 路径最后一段的 * 通配。输出相对路径，每行一个。
 expand_entry() {
     local entry="$1" base="$2" dir
-    # 纵深防御：拒绝越界条目（正常由 parse_manifest 过滤）
+    # 纵深防御：拒绝越界条目（正常由 parse_manifest 过滤）；组件级检查
+    # 与 parse_manifest 保持一致，避免误拒含 .. 子串的合法文件名
     case "$entry" in
-        /*|*".."*)
+        /*)
+            echo "WARNING: 拒绝不安全条目 '$entry'" >&2
+            return 0
+            ;;
+    esac
+    case "/$entry" in
+        *"/../"*|*/..)
             echo "WARNING: 拒绝不安全条目 '$entry'" >&2
             return 0
             ;;
@@ -302,13 +316,17 @@ cmd_stage() {
 check_target_within_repo() {
     local path="$1" rel target_dir repo_physical
     rel="$(dirname "$path")"
-    while [ -n "$rel" ] && [ "$rel" != "." ] && [ ! -e "$REPO_DIR/$rel" ]; do
+    # 向上找最近的已存在祖先；symlink（含 dangling）也必须停下检查，
+    # 因为 -e 对 dangling symlink 为假，跳过会导致 mkdir/cp 跟随写穿
+    while [ -n "$rel" ] && [ "$rel" != "." ] && [ ! -e "$REPO_DIR/$rel" ] && [ ! -L "$REPO_DIR/$rel" ]; do
         rel="$(dirname "$rel")"
     done
     if [ -z "$rel" ] || [ "$rel" = "." ]; then
-        return 0   # 整条路径均为新建，不可能越过 REPO_DIR
+        return 0   # 整条路径均为新建（无 symlink 祖先），不可能越过 REPO_DIR
     fi
-    if [ -d "$REPO_DIR/$rel" ]; then
+    if [ -L "$REPO_DIR/$rel" ] || [ -d "$REPO_DIR/$rel" ]; then
+        # 祖先是指向目录的 symlink（含 dangling）或真实目录：
+        # 解析物理路径（pwd -P 处理 symlink）并验证仍在 REPO_DIR 内
         target_dir="$(cd "$REPO_DIR" && cd "$rel" 2>/dev/null && pwd -P)" || target_dir=""
         repo_physical="$(cd "$REPO_DIR" && pwd -P 2>/dev/null)" || repo_physical="$REPO_DIR"
         case "$target_dir" in
@@ -351,6 +369,13 @@ cmd_apply() {
                             apply_failed=1
                             continue
                         fi
+                        # 目标文件本身是 symlink 时拒绝，防 cp 跟随写穿仓库外
+                        if [ -L "$REPO_DIR/$path" ]; then
+                            echo "ERROR: 拒绝覆盖符号链接目标 '$path'" >&2
+                            need_action=1
+                            apply_failed=1
+                            continue
+                        fi
                         mkdir -p "$(dirname "$REPO_DIR/$path")"
                         if cp "$UPSTREAM_DIR_PATH/$path" "$REPO_DIR/$path"; then
                             echo "已更新: $path"
@@ -375,12 +400,21 @@ cmd_apply() {
         done <<< "$diff_out"
     fi
     if [ "$OPT_YES" -eq 1 ] && [ "$apply_failed" -eq 0 ]; then
-        mkdir -p "$REPO_DIR/.aw-update"
-        if echo "$TARGET_REF" > "$REPO_DIR/$VERSION_FILE"; then
-            echo "版本记录已更新: $VERSION_FILE = $TARGET_REF"
-        else
-            echo "ERROR: 无法写入 $VERSION_FILE" >&2
+        # 版本记录目录链同样做边界校验（防预置 symlink 目录写穿）
+        if ! check_target_within_repo "$VERSION_FILE"; then
+            echo "ERROR: 拒绝越界版本记录路径 $VERSION_FILE" >&2
             need_action=1
+        else
+            mkdir -p "$REPO_DIR/.aw-update"
+            if [ -L "$REPO_DIR/$VERSION_FILE" ]; then
+                echo "ERROR: 拒绝通过符号链接写入 $VERSION_FILE" >&2
+                need_action=1
+            elif echo "$TARGET_REF" > "$REPO_DIR/$VERSION_FILE"; then
+                echo "版本记录已更新: $VERSION_FILE = $TARGET_REF"
+            else
+                echo "ERROR: 无法写入 $VERSION_FILE" >&2
+                need_action=1
+            fi
         fi
     elif [ "$OPT_YES" -eq 1 ]; then
         echo "警告: 存在未完成的更新，版本记录未推进（$VERSION_FILE 保持原值）。"

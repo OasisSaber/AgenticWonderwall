@@ -253,6 +253,45 @@ class AwUpdateTest(unittest.TestCase):
             "new check\n",
         )
 
+    def test_apply_rejects_unsafe_ref(self):
+        # --ref 含路径分隔/.. 会被拒绝（防拼入缓存路径后 rm -rf 越界）
+        result = run_script(self.project, "apply", "--source", posix(self.upstream),
+                            "--ref", "../../evil", "--yes", *self.manifest_arg())
+        self.assertEqual(result.returncode, 3)
+        self.assertIn("非法的 ref", result.stderr)
+
+    def test_apply_rejects_symlink_target(self):
+        # 目标文件是 symlink（指向仓库外）：apply --yes 拒绝覆盖
+        outside = self.project.parent / "outside.txt"
+        write_lf(outside, "outside\n")
+        link_path = self.project / "scripts" / "lib" / "two.py"
+        try:
+            link_path.symlink_to(outside)
+        except OSError:
+            self.skipTest("symlink not supported in this environment")
+        result = run_script(self.project, "apply", "--source", posix(self.upstream),
+                            "--ref", "v1.1.0", "--yes", *self.manifest_arg())
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("拒绝覆盖符号链接目标", result.stderr)
+        self.assertTrue(link_path.is_symlink())
+        self.assertEqual(outside.read_text(encoding="utf-8"), "outside\n")
+
+    def test_apply_rejects_dangling_symlink_ancestor(self):
+        # 中间组件是 dangling symlink（指向不存在的外部目录）：
+        # 拒绝，防止 mkdir/cp 跟随写穿到外部
+        outside_dir = self.project.parent / "outside_dir"
+        link_dir = self.project / "scripts" / "lib"
+        shutil.rmtree(link_dir)
+        try:
+            link_dir.symlink_to(outside_dir, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink not supported in this environment")
+        result = run_script(self.project, "apply", "--source", posix(self.upstream),
+                            "--ref", "v1.1.0", "--yes", *self.manifest_arg())
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("拒绝越界目标路径", result.stderr)
+        self.assertFalse((outside_dir / "two.py").exists())
+
     # ---- usage / errors ----
 
     def test_unknown_command(self):
