@@ -43,13 +43,13 @@ main 完成实现与验证
         ↓
 独立消费者 smoke 测试
         ↓
-最终发布审核（版本号、候选 commit、目标分支与 tag、Release Notes、全部写操作）
+最终发布审核（版本号、候选 = 最新 origin/main、目标分支 v1 及其 SHA、tag、Release Notes、全部写操作与顺序）
         ↓
-人类一次批准完整发布事务
+人类一次批准完整发布事务（一次聚合授权，不重复询问）
         ↓
-Agent 连续执行：创建不可变 Release tag → 固定 tag 再次测试 → 快进 v1
+Agent 连续执行：push tag → 固定 tag 消费者 smoke test → push v1 → @v1 消费者 smoke test → 创建 Release
         ↓
-@v1 再次测试与远端验证（分支、tag、Release 指向同一 commit）
+最终远端验证（Release tagName/非 Draft、tag 的 peeled commit SHA、分支对齐）
         ↓
 最终汇报
 ```

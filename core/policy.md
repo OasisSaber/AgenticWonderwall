@@ -27,7 +27,7 @@
 - 创建指定版本的 annotated tag；
 - push 稳定分支和 tag；
 - 创建 GitHub Release；
-- 验证远端分支、tag 与 Release 指向同一 commit。
+- 验证远端分支、tag（peeled commit SHA）与 Release（tagName）与候选 commit 对齐。
 
 取得聚合授权后，主交付责任人应完成授权范围内的全部操作，不得对同一范围
 重复请求批准，也不得把可由自身工具完成的操作转交人类手工执行。
