@@ -18,9 +18,6 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 | 验证入口 | `bash scripts/check.sh` |
 | Actions 接口 | [docs/actions-interface.md](docs/actions-interface.md) |
 | 版本通道 | [docs/release-channels.md](docs/release-channels.md) |
-| 更新指南 | [docs/update-guide.md](docs/update-guide.md) |
-| AI Contributor 配置 | [.ai-contributors.yaml](.ai-contributors.yaml) |
-| AI Contributor 说明 | [docs/ai-contributors.md](docs/ai-contributors.md) |
 | 复制接口 | GitHub Template Repository |
 | 版本接口 | Git tag / GitHub Release |
 
@@ -40,17 +37,13 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 
 ### 仅采用通用规则
 
-可以只摘取根部 `AGENTS.md`，但它不是无需修改即可独立运行的配置文件。采用者必须先替换“项目事实”和验证命令，并删除或替换没有一并复制的仓库内链接、PowerShell 入口和可选依赖任务路径。不得把不存在的 `scripts/check.sh` 或支持文档继续声明为有效入口。
+可以只摘取根部 `AGENTS.md`，但它不是无需修改即可独立运行的配置文件。采用者必须先替换“项目事实”和验证命令，并删除或替换没有一并复制的仓库内链接与 PowerShell 入口。不得把不存在的 `scripts/check.sh` 或支持文档继续声明为有效入口。
 
 ### 仅采用工作流 skill
 
 可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工批准与聚合授权）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。发布与授权规则以 `core/policy.md` 与 `profiles/` 为权威来源（见 [core/policy.md](core/policy.md)）。
 
 所有采用方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
-
-已采用仓库的模板内容（skill、规则文件、脚本）不会自动同步；复制
-`scripts/aw-update.sh` 后，加载 `agentic-wonderwall` skill 会自动检查上游
-新版本并引导更新，流程见[更新指南](docs/update-guide.md)。
 
 ## 快速开始
 
@@ -88,10 +81,6 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 
 从同步、创建 change、跟踪与 push bookmark、更新 Pull Request，到人工 Squash Merge 后清理的完整命令见 [CONTRIBUTING.md](CONTRIBUTING.md)。遇到 `main`、`main@origin` 或任务 bookmark 冲突时停止，不要强推或猜测目标。
 
-## 可选高级路径
-
-默认工作流不要求任务队列。只有多个 Issue 明确声明有序依赖链时，单 Agent 才可以使用[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)提前准备下游任务；每个任务仍保持独立 change、bookmark、PR、验证和人工合并决定。
-
 ## 本仓库验证
 
 ```bash
@@ -128,29 +117,6 @@ AW 负责工作流治理、PR 合规检查、安全基线与调用约束；业�
 `scripts/check.sh` 暴露。接口契约见
 [docs/actions-interface.md](docs/actions-interface.md)，版本通道见
 [docs/release-channels.md](docs/release-channels.md)。
-
-## AI Contributors
-
-AI Agent/模型对变更产生实质贡献时，把它记录为共同作者，人类用户保持主要
-commit author：
-
-```bash
-python scripts/ai_contributors.py generate codex claude
-```
-
-```text
-Co-authored-by: Codex <codex@users.noreply.github.com>
-Co-authored-by: Claude <noreply@anthropic.com>
-```
-
-身份在 [.ai-contributors.yaml](.ai-contributors.yaml) 配置；未配置可关联邮箱
-的模型（如 DeepSeek）生成时直接失败并提示配置自建 Bot/Agent 账户邮箱，不
-静默伪造 GitHub 账户。生成结果写入提交信息前须经人类确认，并在 PR 描述中
-汇总 `Co-authored-by` 行以兼容 Squash Merge。
-
-GitHub 根据邮箱关联 Contributor 账户，Contributors 图表只统计最终进入默认
-分支的提交且刷新存在延迟；没有对应 GitHub 账户的邮箱只显示文本署名。使用
-示例与限制详见 [docs/ai-contributors.md](docs/ai-contributors.md)。
 
 ## 维护边界
 

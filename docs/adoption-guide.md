@@ -26,10 +26,6 @@ scripts/check.sh
 
 其中 `.github/workflows/check.yml` 是薄调用器：
 
-需要接收模板内容更新时，额外复制 `scripts/aw-update.sh` 与
-`scripts/aw-update-manifest.txt`；更新机制见
-[docs/update-guide.md](update-guide.md)。
-
 ```yaml
 name: Check
 
@@ -72,7 +68,6 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 最低维护集合包括：
 
 - 根部 `AGENTS.md` 与 `CONTRIBUTING.md`；
-- 根部 `.ai-contributors.yaml` 与 `scripts/ai_contributors.py`（AI Contributor 身份配置与 trailer 工具，规则引用见 [docs/ai-contributors.md](ai-contributors.md)）；
 - `.github/pull_request_template.md`、`.github/workflows/` 与需要的 Issue Form；
 - `scripts/` 中的权威验证入口、共享验证组件、依赖文件和测试；
 - `docs/` 中被采用规则引用的支持文档。
@@ -84,9 +79,8 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 只复制根部 `AGENTS.md` 时，应把它视为规则素材而不是可直接运行的完整配置。采用前必须：
 
 1. 替换项目名、目标、技术栈、默认分支和真实验证命令；
-2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1`、`scripts/ai_contributors.py` 与支持文档链接；
-3. 删除不采用的可选依赖任务路径，或一并复制并维护其支持文档；
-4. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
+2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1` 与支持文档链接；
+3. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
 
 ### 仅采用工作流 skill
 
@@ -101,12 +95,6 @@ skill 是自包含的便携汇总，不替代采用项目自身的规则文件�
 "仅 skill"。
 
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
-
-采用后，模板内容的更新通过 `scripts/aw-update.sh` 完成：加载
-`agentic-wonderwall` skill 时会自动检查上游新版本并向人类报告差异摘要，
-确认后按标准变更任务流程执行（jj change → 验证 → PR → 人类 Squash
-Merge）。`keep` 定制文件（`AGENTS.md` 等）不会被自动覆盖，需人工合并。
-完整说明见 [docs/update-guide.md](update-guide.md)。
 
 ## 新项目
 
@@ -151,8 +139,6 @@ Merge）。`keep` 定制文件（`AGENTS.md` 等）不会被自动覆盖，需�
 - [ ] 用一个真实 Issue 或明确人类授权创建单独 jj change 与短期 bookmark。
 - [ ] 做一处容易审阅和回滚的变更，运行 `bash scripts/check.sh`；真实 Windows 同时运行 `pwsh -NoProfile -File scripts/check.ps1`，macOS 在本机运行 Bash 入口。
 - [ ] 阅读完整 diff，只 push 任务 bookmark，并确认该 bookmark 已跟踪 `@origin`。
-- [ ] 若已复制 `scripts/aw-update.sh`，运行 `bash scripts/aw-update.sh check`
-      确认更新检查可用，并初始化 `.aw-update/VERSION` 记录来源版本。
 - [ ] 创建 Draft Pull Request，确认正文校验与仓库 CI 通过。
 - [ ] 由人类决定并执行 Squash Merge；Agent 不执行 merge。
 - [ ] fetch 最新 `main`，新建基于 `main` 的空 change，并用 `jj bookmark forget` 完成本地清理。
@@ -175,7 +161,7 @@ Merge）。`keep` 定制文件（`AGENTS.md` 等）不会被自动覆盖，需�
 
 根部 `AGENTS.md` 是权威规则，`skills/agentic-wonderwall/SKILL.md` 是便携
 汇总，两者必须同步覆盖相同的规则要点（验证入口、权威顺序、任务路径、
-jj change 与 bookmark、人工批准与聚合授权、Squash Merge、AI Contributors、
+jj change 与 bookmark、人工批准与聚合授权、Squash Merge、
 Agent 自审、审查意见三类用语、冲突停止、安全与卫生、验证失败不得表述为
 成功等）。修改任一侧的规则要点时，必须同步另一侧。
 
@@ -198,9 +184,5 @@ Git 版本: <git --version>
 验证状态: <VERIFIED / PARTIAL>
 首次演练 PR: <URL>
 ```
-
-同时维护机器可读版本记录 `.aw-update/VERSION`（由 `scripts/aw-update.sh
-apply` 自动写入，供 skill 加载时检查更新，见
-[docs/update-guide.md](update-guide.md)）。
 
 Issue 与明确人类授权二选一。使用授权引用时，必须同时记录授权来源、目标和范围。采用来源必须填写实际使用的 Release tag 或完整 commit SHA。`PARTIAL` 只描述尚未在真实目标平台完成烟雾测试，不应被写成完整跨平台支持。

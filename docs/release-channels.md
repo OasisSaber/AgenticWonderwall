@@ -4,7 +4,7 @@ AgenticWonderwall 中央 Actions 接口使用以下版本通道：
 
 ```text
 main        AW 开发与自测
-v1          持续更新的兼容分支
+v1          兼容线（已冻结，指向承载 v2.0.0 内容的提交，不再推进）
 v1.1.0      不可变 Release tag
 完整 SHA    最高可复现性和紧急固定
 ```
@@ -36,7 +36,7 @@ uses 引用版本 == policy-ref
 
 ## 发布流程
 
-发布采用单一最终授权门（聚合授权语义见 [core/policy.md](../core/policy.md)，执行方式见 [profiles/git.md](../profiles/git.md) 与 [profiles/jj.md](../profiles/jj.md)）：
+发布采用单一最终授权门（聚合授权语义见 [core/policy.md](../core/policy.md)，执行方式见 [profiles/git.md](../profiles/git.md) 与 [profiles/jj.md](../profiles/jj.md)）。`v1` 兼容线已冻结（2026-08-02，指向承载 v2.0.0 内容的提交），发布流程中的 `push v1` 步骤在冻结期间不执行；未来是否建立新版本通道作为独立发布任务处理：
 
 ```text
 main 完成实现与验证
@@ -54,18 +54,19 @@ Agent 连续执行：push tag → 固定 tag 消费者 smoke test → push v1 �
 最终汇报
 ```
 
-所有 tag 创建、Release 发布与 `v1` 分支推进必须经人类批准；批准后由 Agent 在已列明范围内连续执行，不要求用户逐步确认，也不转交用户手工执行。
+所有 tag 创建、Release 发布必须经人类批准；批准后由 Agent 在已列明范围内连续执行，不要求用户逐步确认，也不转交用户手工执行。
 
 ## v1 更新规则
 
-`v1` 仅允许：
+`v1` 兼容线已冻结，仅允许：
 
-- 经人类批准后更新（批准后可由 Agent 代执行）；
-- 快进到已经发布并验证的 Release commit；
+- 保持当前指向（承载 v2.0.0 内容的提交），不再推进、不再创建新 v1.x tag；
 - 禁止 force push；
-- 禁止删除；
+- 禁止删除或移动；
 - 禁止 Agent 凭据更新；
 - 禁止直接在 `v1` 开发。
+
+`policy-ref` 默认值保持 `v1`：`@v1` 永远解析到冻结指向，现有消费者无需改动。
 
 ## 回退流程
 
@@ -76,7 +77,7 @@ main 创建前向修复
         ↓
 发布新的补丁版本
         ↓
-v1 继续向前快进
+新通道发布（v1 冻结期间不推进 v1）
 ```
 
 不得通过强推 `v1` 回写历史。
