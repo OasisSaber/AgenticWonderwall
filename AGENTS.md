@@ -12,7 +12,7 @@
 ## 项目事实
 
 - 项目名：AgenticWonderwall
-- 项目目标：维护面向个人开发者的单 Agent 工作流模板（任务生命周期 + 发布治理），并集中维护、版本化发布 GitHub Actions 可重用工作流接口
+- 项目目标：维护面向个人开发者的“单一交付责任人的 AI 辅助代码交付治理协议”（任务生命周期 + 发布治理），并集中维护、版本化发布 GitHub Actions 可重用工作流接口
 - 中央 Actions 接口：`OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml`，业务仓库通过 `uses ... @v1` 调用，调用约束见 [docs/actions-interface.md](docs/actions-interface.md)，版本通道见 [docs/release-channels.md](docs/release-channels.md)
 - 接口承诺：`v1` 生命周期内不得移动工作流路径、删除或重命名输入、更改默认项目验证入口、更改 required check 公共名称、新增 Secret 或写权限；中央接口变更视为公共 API 变更，破坏性调整只允许在下一主版本进行
 - 默认分支：`main`
@@ -23,7 +23,7 @@
   bash scripts/check.sh
   ```
 - 合并方式：只接受人类决定的 Squash Merge
-- 版本通道状态：`v1` 兼容线已冻结（当前指向 v2.0.0 内容，不再推进）；`policy-ref` 默认值保持 `v1`；未来版本通道调整作为独立发布任务处理
+- 版本通道状态：`v1` 兼容线已冻结（当前指向 v2.0.0 内容，不再推进）；`policy-ref` 默认值保持 `v1`；发布为 tag-only（创建 tag → 固定 tag smoke → Release，不推进 v1、不执行 @v1 smoke），流程见 [docs/release-channels.md](docs/release-channels.md) 与 [profiles/git.md](profiles/git.md)；未来版本通道调整作为独立发布任务处理
 - merge、release、部署与受保护分支推进未经人类明确批准不得执行；人类一次批准完整发布事务（见 [core/policy.md](core/policy.md)）后，Agent 可在已列明范围内连续执行
 
 采用到其他项目时，应更新本节中的项目目标、技术栈、验证命令和受保护分支。

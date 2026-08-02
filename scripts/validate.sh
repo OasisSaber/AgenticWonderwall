@@ -1,12 +1,11 @@
 #!/bin/bash
 # Technical validation for AgenticWonderwall.
 #
-# Verifies exactly five checks:
+# Verifies exactly four checks:
 #   1. Internal Markdown links and anchors
 #   2. Committed mode of Shell scripts
 #   3. YAML syntax
 #   4. Shell syntax
-#   5. AGENTS.md 与 skill 规则同步
 
 set -o pipefail
 
@@ -140,21 +139,9 @@ else
 fi
 echo ""
 
-# ---- Check 5: AGENTS.md 与 skill 规则同步 ----
-echo "--- Check 5: AGENTS.md 与 skill 规则同步 ---"
-if [ -z "$PYTHON" ]; then
-    echo "  UNAVAILABLE: Python is required for skill-rule sync validation."
-    FAILED=$((FAILED + 1))
-elif "$PYTHON" scripts/validate_skill_sync.py "$REPO_DIR"; then
-    :
-else
-    FAILED=$((FAILED + 1))
-fi
-echo ""
-
 echo "=== Results ==="
 if [ "$FAILED" -eq 0 ]; then
-    echo "All five technical checks passed."
+    echo "All four technical checks passed."
 else
     echo "$FAILED technical check(s) failed."
 fi

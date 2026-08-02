@@ -2,9 +2,9 @@
 
 A minimal single-Agent workflow for GitHub and Jujutsu.
 
-AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治理规范，并提供集中维护、版本化发布的 GitHub Actions 可重用工作流接口。
+AgenticWonderwall 是面向个人开发者的“单一交付责任人的 AI 辅助代码交付治理协议”（GitHub Flow + Jujutsu 适配），并提供集中维护、版本化发布的 GitHub Actions 可重用工作流接口。
 
-它不是 Agent 服务、多 Agent 编排平台、Web 或 API 服务、CLI 产品、Agent 运行时、自动发布机器人、项目管理系统；不自动 merge 或 release。
+它不是 Agent 服务、多 Agent 编排平台、Web 或 API 服务、CLI 产品、Agent 运行时、自动发布机器人、项目管理系统；不自动 merge 或 release。允许研究/实现/检查子代理与多个模型参与，但只能有一个主交付责任人控制任务最终范围、VCS、最终验证、push、Pull Request、发布授权执行与人类交接。
 
 ## 稳定接口
 
@@ -39,9 +39,16 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 
 可以只摘取根部 `AGENTS.md`，但它不是无需修改即可独立运行的配置文件。采用者必须先替换“项目事实”和验证命令，并删除或替换没有一并复制的仓库内链接与 PowerShell 入口。不得把不存在的 `scripts/check.sh` 或支持文档继续声明为有效入口。
 
-### 仅采用工作流 skill
+### 最小采用集合（含薄 Skill）
 
-可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工批准与聚合授权）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。发布与授权规则以 `core/policy.md` 与 `profiles/` 为权威来源（见 [core/policy.md](core/policy.md)）。
+最小采用集合为：根部 `AGENTS.md`、`core/`、所需 `profiles/` 与可选
+`adapters/`；[skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md)
+是客户端加载入口，不是完整规则本体——仅复制 Skill 不构成完整采用，必须
+同时采用上述仓库规则文件。Skill 加载后会检测 AW 文件、声明加载顺序与权威
+来源，并在 `AGENTS.md`、`core/` 或所需 Profile 缺失时提示“AW 未完整安装”。
+采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按
+[采用指南](docs/adoption-guide.md)完成烟雾测试。发布与授权规则以
+`core/policy.md` 与 `profiles/` 为权威来源（见 [core/policy.md](core/policy.md)）。
 
 所有采用方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
 
