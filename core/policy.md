@@ -38,7 +38,7 @@
 
 - 发布版本号；
 - 候选 commit SHA；
-- 目标稳定分支；
+- 目标稳定分支（如适用；tag-only 发布不涉及）；
 - 目标 tag；
 - Release Notes 状态；
 - 即将执行的全部外部写操作；
@@ -79,7 +79,7 @@
 - 阅读完整 diff；
 - 检查 changelog；
 - 生成或整理 Release Notes；
-- 检查稳定分支是否可快进；
+- 检查稳定分支是否可快进（如适用；tag-only 发布不涉及）；
 - 检查是否存在冲突；
 - 准备精确命令或 API 操作；
 - 汇总风险和停止条件。
@@ -104,7 +104,7 @@
 
 验证：
 
-- 稳定分支指向预期 commit；
+- 稳定分支指向预期 commit（如适用；tag-only 发布不涉及）；
 - tag 指向预期 commit；
 - GitHub Release 使用正确 tag；
 - Release Notes 正确；
@@ -124,7 +124,7 @@
 - 目标 tag 发生变化；
 - Release Notes 有实质变化；
 - 验证结果失效；
-- 远端稳定分支在授权后被修改；
+- 远端稳定分支在授权后被修改（如适用；tag-only 发布不涉及）；
 - 目标 tag 或 Release 在授权后被创建；
 - 出现冲突；
 - 操作范围扩大；

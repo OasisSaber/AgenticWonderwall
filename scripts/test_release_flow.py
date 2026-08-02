@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-"""Real Git release-flow tests for the AgenticWonderwall Git Profile.
+"""Real Git tag-only release-flow tests for the AgenticWonderwall Git Profile.
 
-Runs the release transaction described in profiles/git.md against real,
-temporary Git repositories (work repo + bare upstream as origin) to verify:
+Runs the tag-only release transaction described in profiles/git.md against
+real, temporary Git repositories (work repo + bare upstream as origin) to
+verify:
 
 - candidate must equal the latest origin/main (not any remote ref);
-- merge-base --is-ancestor argument order (fast-forward guard);
-- target tag must not already exist;
-- execution re-checks the approved baseline: origin/main unchanged and
-  origin/v1 still at APPROVED_BRANCH_SHA, otherwise abort;
-- tag smoke test failure blocks the v1 push;
-- @v1 smoke test failure blocks the Release creation;
+- execution re-checks the approved baseline: origin/main unchanged, target
+  tag/Release absent, otherwise abort;
+- tag smoke test failure blocks the Release creation;
 - gh release create must include --verify-tag;
 - success path executes the documented order:
-  push tag -> tag smoke -> push v1 -> @v1 smoke -> create release;
-- peeled tag SHA (refs/tags/<tag>^{}) equals the candidate commit.
+  create tag -> push tag -> tag smoke -> create release;
+- peeled tag SHA (refs/tags/<tag>^{}) equals the candidate commit;
+- v1 (frozen compatibility line) is never touched.
 
 Every command is a real `git` invocation; no mocks (gh is not executed,
 its command line is constructed and asserted).
@@ -35,13 +34,11 @@ GIT = shutil.which("git") or "git"
 BRANCH = "v1"
 TAG = "v1.2.0"
 SOURCE_BRANCH = "main"
-# Documented order of the release transaction (profiles/git.md 阶段 C).
+# Documented tag-only order (profiles/git.md 阶段 C).
 DOCUMENTED_ORDER = [
     "tag_create",
     "tag_push",
     "tag_smoke",
-    "v1_push",
-    "v1_smoke",
     "release",
 ]
 
@@ -58,7 +55,7 @@ def run_git(cwd: Path, *args: str, check: bool = True) -> subprocess.CompletedPr
 
 
 def release_command(tag: str, notes_file: str) -> list[str]:
-    """Build the gh release create command line (profiles/git.md 阶段 C step 7)."""
+    """Build the gh release create command line (profiles/git.md 阶段 C step 4)."""
     return [
         "gh",
         "release",
@@ -73,7 +70,7 @@ def release_command(tag: str, notes_file: str) -> list[str]:
 
 
 class ReleaseFlowTest(unittest.TestCase):
-    """Real-git integration tests for the Git Profile release transaction."""
+    """Real-git integration tests for the tag-only release transaction."""
 
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
@@ -116,11 +113,9 @@ class ReleaseFlowTest(unittest.TestCase):
         self,
         *,
         candidate: str | None = None,
-        approved_branch_sha: str | None = None,
         tag_smoke_ok: bool = True,
-        v1_smoke_ok: bool = True,
     ) -> tuple[list[str], str | None]:
-        """Execute the documented release transaction; returns (events, error).
+        """Execute the documented tag-only transaction; returns (events, error).
 
         gh release create is NOT executed (unavailable/untested in CI); its
         command line is recorded as the final event instead.
@@ -130,14 +125,11 @@ class ReleaseFlowTest(unittest.TestCase):
 
         # 阶段 C step 0: re-check the approved baseline
         cur_main = self.remote_ref(f"refs/heads/{SOURCE_BRANCH}")
-        cur_v1 = self.remote_ref(f"refs/heads/{BRANCH}")
         if candidate is None:
             candidate = cur_main
         if candidate != cur_main:
             return events, "candidate is not the latest origin/main"
-        if approved_branch_sha is not None and cur_v1 != approved_branch_sha:
-            return events, "origin/v1 changed since approval"
-        # Phase A / step 0: target tag must not exist (remote)
+        # target tag must not exist (remote) and must not have been created
         if self.remote_ref(f"refs/tags/{TAG}"):
             return events, "tag already exists"
 
@@ -154,62 +146,10 @@ class ReleaseFlowTest(unittest.TestCase):
         if not tag_smoke_ok:
             return events, "tag smoke test failed"
 
-        # 4. fast-forward v1 and 5. push v1
-        run_git(self.work, "fetch", "-q", "origin")
-        ff = run_git(
-            self.work,
-            "merge-base",
-            "--is-ancestor",
-            f"origin/{BRANCH}",
-            candidate,
-            check=False,
-        )
-        if ff.returncode != 0:
-            return events, "v1 not fast-forwardable"
-        local_sha = run_git(
-            self.work, "rev-parse", "--verify", f"refs/heads/{BRANCH}", check=False
-        ).stdout.strip()
-        if local_sha and approved_branch_sha is not None and local_sha != approved_branch_sha:
-            return events, "local branch diverged from approved baseline"
-        run_git(self.work, "branch", "-f", BRANCH, candidate)
-        run_git(self.work, "push", "-q", "origin", BRANCH)
-        events.append("v1_push")
-
-        # 6. @v1 consumer smoke test
-        events.append("v1_smoke")
-        if not v1_smoke_ok:
-            return events, "@v1 smoke test failed"
-
-        # 7. create GitHub Release (command line only; --verify-tag asserted)
+        # 4. create GitHub Release (command line only; --verify-tag asserted)
         events.append("release")
         release_command(TAG, "NOTES.md")
         return events, None
-
-    # ---- merge-base argument order --------------------------------------
-
-    def test_merge_base_argument_order(self) -> None:
-        """Fast-forward guard requires --is-ancestor <branch-head> <candidate>."""
-        candidate = self.commit_on("main", "candidate commit")
-        run_git(self.work, "push", "origin", "main")
-        run_git(self.work, "fetch", "origin")
-        ok = run_git(
-            self.work,
-            "merge-base",
-            "--is-ancestor",
-            f"origin/{BRANCH}",
-            candidate,
-            check=False,
-        )
-        self.assertEqual(ok.returncode, 0, "correct order must report fast-forward")
-        bad = run_git(
-            self.work,
-            "merge-base",
-            "--is-ancestor",
-            candidate,
-            f"origin/{BRANCH}",
-            check=False,
-        )
-        self.assertNotEqual(bad.returncode, 0, "wrong order must not report fast-forward")
 
     # ---- candidate must be the latest origin/main -----------------------
 
@@ -222,33 +162,15 @@ class ReleaseFlowTest(unittest.TestCase):
         run_git(self.work, "fetch", "-q", "origin")
         events, error = self.run_release_flow(candidate=feature)
         self.assertEqual(error, "candidate is not the latest origin/main")
-        # nothing must have been created or pushed
         self.assertEqual(events, [])
         self.assertEqual(self.remote_ref(f"refs/tags/{TAG}"), "", "tag must not exist")
         self.assertEqual(
             self.remote_ref(f"refs/heads/{BRANCH}"),
             self.initial_v1_sha,
-            "v1 must remain unchanged",
+            "v1 must remain unchanged (frozen)",
         )
 
     # ---- approved baseline change detection -----------------------------
-
-    def test_approved_branch_sha_change_rejected(self) -> None:
-        """Execution aborts when origin/v1 no longer matches the approved SHA."""
-        candidate = self.commit_on("main", "candidate commit")
-        run_git(self.work, "push", "-q", "origin", "main")
-        run_git(self.work, "fetch", "-q", "origin")
-        approved_v1 = self.remote_ref(f"refs/heads/{BRANCH}")
-        # remote v1 moves ahead AFTER the approval was recorded
-        self.commit_on(BRANCH, "v1 moves ahead")
-        run_git(self.work, "push", "-q", "origin", BRANCH)
-        run_git(self.work, "fetch", "-q", "origin")
-        events, error = self.run_release_flow(
-            candidate=candidate, approved_branch_sha=approved_v1
-        )
-        self.assertEqual(error, "origin/v1 changed since approval")
-        self.assertEqual(events, [])
-        self.assertEqual(self.remote_ref(f"refs/tags/{TAG}"), "", "tag must not exist")
 
     def test_origin_main_moved_after_approval_rejected(self) -> None:
         """Execution aborts when origin/main no longer equals the candidate."""
@@ -264,37 +186,23 @@ class ReleaseFlowTest(unittest.TestCase):
         self.assertEqual(events, [])
         self.assertEqual(self.remote_ref(f"refs/tags/{TAG}"), "", "tag must not exist")
 
-    # ---- smoke tests gate the following steps ---------------------------
+    # ---- smoke test gates the Release -----------------------------------
 
-    def test_tag_smoke_failure_blocks_v1(self) -> None:
-        """When the fixed-tag smoke test fails, v1 must not be pushed."""
+    def test_tag_smoke_failure_blocks_release(self) -> None:
+        """When the fixed-tag smoke test fails, the Release must not be created."""
         candidate = self.commit_on("main", "candidate commit")
         run_git(self.work, "push", "-q", "origin", "main")
         run_git(self.work, "fetch", "-q", "origin")
-        v1_before = self.remote_ref(f"refs/heads/{BRANCH}")
         events, error = self.run_release_flow(tag_smoke_ok=False)
         self.assertEqual(error, "tag smoke test failed")
         self.assertEqual(events, ["tag_create", "tag_push", "tag_smoke"])
-        self.assertEqual(
-            self.remote_ref(f"refs/heads/{BRANCH}"), v1_before,
-            "v1 must not move when tag smoke fails",
-        )
-
-    def test_v1_smoke_failure_blocks_release(self) -> None:
-        """When the @v1 smoke test fails, the Release must not be created."""
-        candidate = self.commit_on("main", "candidate commit")
-        run_git(self.work, "push", "-q", "origin", "main")
-        run_git(self.work, "fetch", "-q", "origin")
-        events, error = self.run_release_flow(v1_smoke_ok=False)
-        self.assertEqual(error, "@v1 smoke test failed")
-        self.assertEqual(events, ["tag_create", "tag_push", "tag_smoke", "v1_push", "v1_smoke"])
-        # tag pushed but Release step not reached
         self.assertNotEqual(
             self.remote_ref(f"refs/tags/{TAG}"), "", "tag must be pushed before smoke"
         )
         self.assertNotIn("release", events, "release must not be created")
-        self.assertNotEqual(
-            self.remote_ref(f"refs/tags/{TAG}"), "", "tag pushed before smoke gate"
+        self.assertEqual(
+            self.remote_ref(f"refs/heads/{BRANCH}"), self.initial_v1_sha,
+            "v1 must remain unchanged (frozen)",
         )
 
     # ---- gh release create --verify-tag ---------------------------------
@@ -311,7 +219,7 @@ class ReleaseFlowTest(unittest.TestCase):
     # ---- success path matches documented order --------------------------
 
     def test_success_flow_order_matches_docs(self) -> None:
-        """Success path events must match the documented release order."""
+        """Success path events must match the documented tag-only order."""
         candidate = self.commit_on("main", "candidate commit")
         run_git(self.work, "push", "-q", "origin", "main")
         run_git(self.work, "fetch", "-q", "origin")
@@ -320,13 +228,9 @@ class ReleaseFlowTest(unittest.TestCase):
         self.assertEqual(events, DOCUMENTED_ORDER)
 
         # final verification (阶段 D): peeled tag SHA == candidate,
-        # branch == candidate, raw tag ref is the tag object
+        # raw tag ref is the tag object; v1 untouched
         peeled = self.remote_ref(f"refs/tags/{TAG}^{{}}")
         self.assertEqual(peeled, candidate, "peeled tag SHA must equal candidate")
-        self.assertEqual(
-            self.remote_ref(f"refs/heads/{BRANCH}"), candidate,
-            "stable branch must point to candidate",
-        )
         self.assertEqual(
             self.remote_ref(f"refs/tags/{TAG}"),
             run_git(self.work, "rev-parse", TAG).stdout.strip(),
@@ -335,6 +239,10 @@ class ReleaseFlowTest(unittest.TestCase):
         self.assertNotEqual(
             self.remote_ref(f"refs/tags/{TAG}"), candidate,
             "unpeeled ref is the tag object, not the commit",
+        )
+        self.assertEqual(
+            self.remote_ref(f"refs/heads/{BRANCH}"), self.initial_v1_sha,
+            "v1 must remain unchanged (frozen)",
         )
 
     # ---- tag existence guard --------------------------------------------

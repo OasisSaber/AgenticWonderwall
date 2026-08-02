@@ -82,20 +82,19 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 2. 删除或替换没有复制的 `scripts/check.sh`、`scripts/check.ps1` 与支持文档链接；
 3. 重新核对权威顺序，使它引用当前项目真实存在的安全、架构、测试与交付资料。
 
-### 仅采用工作流 skill
+### 最小采用集合（含薄 Skill）
 
-可以只复制仓库根部的 `skills/agentic-wonderwall/` 目录（`SKILL.md` 与
-`references/`）到采用项目的 skill 目录。加载该 skill 即可获得完整工作流指导：
-任务路径、jj change 与 bookmark 生命周期、验证入口、PR 流程、审查意见用语、
-人工批准与聚合授权、停止条件，详见 [skills/agentic-wonderwall/SKILL.md](../skills/agentic-wonderwall/SKILL.md)；发布与授权规则详见 [core/policy.md](../core/policy.md)。
-
-skill 是自包含的便携汇总，不替代采用项目自身的规则文件，也不构成第二套通用
-规则。采用者仍必须替换项目事实、配置真实验证命令与 GitHub 保护，并按
-[新仓库烟雾测试](#新仓库烟雾测试)完成端到端演练；版本记录中的采用范围填写
-"仅 skill"。
+最小采用集合为：根部 `AGENTS.md`、`core/`、所需 `profiles/` 与可选
+`adapters/`；`skills/agentic-wonderwall/`（`SKILL.md` 与 `references/`）是
+客户端加载入口，不是完整规则本体——仅复制 Skill 不构成完整采用。Skill
+加载后会检测 AW 文件、声明加载顺序与权威来源，并在 `AGENTS.md`、`core/`
+或所需 Profile 缺失时提示“AW 未完整安装”，不静默推断完整规则。采用者仍
+必须替换项目事实、配置真实验证命令与 GitHub 保护，并按
+[新仓库烟雾测试](#新仓库烟雾测试)完成端到端演练；版本记录中的采用范围
+填写实际采用的规则文件集合（如“最小采用集合：AGENTS.md + core/ +
+profiles/git.md”）。
 
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
-
 ## 新项目
 
 1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。
@@ -157,25 +156,13 @@ skill 是自包含的便携汇总，不替代采用项目自身的规则文件�
 4. 合并或移除重复的通用规则，避免不同文件同时声明最高权威。
 5. 根据现有技术栈配置验证脚本与持续集成，然后完成低风险演练。
 
-## 规则文件同步维护
-
-根部 `AGENTS.md` 是权威规则，`skills/agentic-wonderwall/SKILL.md` 是便携
-汇总，两者必须同步覆盖相同的规则要点（验证入口、权威顺序、任务路径、
-jj change 与 bookmark、人工批准与聚合授权、Squash Merge、
-Agent 自审、审查意见三类用语、冲突停止、安全与卫生、验证失败不得表述为
-成功等）。修改任一侧的规则要点时，必须同步另一侧。
-
-`scripts/validate_skill_sync.py` 检测双向缺失，并作为验证入口的一部分
-（`bash scripts/check.sh` → `scripts/validate.sh` 的 Check 5）在 CI 中
-生效：任何一侧缺少规则要点都会使验证失败，阻止只有单侧更新的提交。
-
 ## 版本记录
 
 在采用项目的文档中记录：
 
 ```markdown
 来源: AgenticWonderwall <release-tag-or-full-commit-sha>
-采用范围: <中央调用 / 完整模板 / 仅 AGENTS.md / 仅 skill / 自定义文件集合>
+采用范围: <中央调用 / 完整模板 / 最小采用集合（AGENTS.md + core/ + profiles/…）/ 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>
 Jujutsu 版本: <jj --version>

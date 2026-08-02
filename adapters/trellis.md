@@ -57,4 +57,8 @@ Plan（brainstorm → prd.md）
 - 本 Adapter 不改变 core/policy.md 的授权语义与人类审批门；
 - 不改变 profiles/ 的发布命令；
 - Trellis 的 auto-check/self-fix 不得把"验证失败"表述为"已验证"；
-- Trellis 的 Finish 不自动 merge、release 或删除远端数据。
+- Trellis 的 Finish 不自动 merge、release 或删除远端数据；
+- 单一交付责任人边界：Trellis 的 brainstorm/implement/check 子代理可参与
+  研究与实现，但不得独立 push、创建或修改 Pull Request、merge、release、
+  deploy、删除远端资源或扩大任务范围；这些操作只能由主交付责任人执行并
+  交由人类决定。
