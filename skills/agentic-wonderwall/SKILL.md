@@ -29,6 +29,10 @@ jj change，通过短期 bookmark 跟踪，经权威验证与 Agent 自审后由
 `.github/` 等文件；本 skill 是这些规则的便携汇总，不建立第二套冲突规则。
 项目自身文件与本地规则永远优先于本 skill 中的通用表述。
 
+修改 `AGENTS.md` 的规则要点时必须同步更新本 skill（反之亦然）；模板仓库
+的验证入口会检测双向缺失（`scripts/validate_skill_sync.py`，作为
+`scripts/validate.sh` 的 Check 5），阻止只有单侧更新的提交。
+
 ## 开始工作
 
 1. 读取当前 Issue，或确认当前会话中的明确人类授权；
