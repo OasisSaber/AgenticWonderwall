@@ -32,7 +32,7 @@ SYNC_POINTS = (
     ("小型低风险任务路径", ("小型低风险任务",)),
     ("可选依赖任务路径", ("依赖任务", "依赖队列")),
     ("jj change 与 bookmark", ("jj change", "bookmark")),
-    ("人工保留操作", ("人工保留操作", "不得自行 merge")),
+    ("人工批准与聚合授权", ("聚合授权", "发布事务", "不得未经批准")),
     ("Squash Merge 由人类决定", ("Squash Merge",)),
     ("AI Contributors 标注", ("AI Contributor", "Co-authored-by", "ai_contributors")),
     ("Agent 自审", ("Agent 自审",)),

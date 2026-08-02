@@ -36,29 +36,31 @@ uses 引用版本 == policy-ref
 
 ## 发布流程
 
-正常发布流程：
+发布采用单一最终授权门（聚合授权语义见 [core/policy.md](../core/policy.md)，执行方式见 [profiles/git.md](../profiles/git.md) 与 [profiles/jj.md](../profiles/jj.md)）：
 
 ```text
 main 完成实现与验证
         ↓
 独立消费者 smoke 测试
         ↓
-人工创建不可变 Release tag
+最终发布审核（版本号、候选 commit、目标分支与 tag、Release Notes、全部写操作）
         ↓
-固定 tag 再次测试
+人类一次批准完整发布事务
         ↓
-人工快进 v1
+Agent 连续执行：创建不可变 Release tag → 固定 tag 再次测试 → 快进 v1
         ↓
-@v1 再次测试
+@v1 再次测试与远端验证（分支、tag、Release 指向同一 commit）
+        ↓
+最终汇报
 ```
 
-所有 tag 创建、Release 发布与 `v1` 分支推进均由人工执行。
+所有 tag 创建、Release 发布与 `v1` 分支推进必须经人类批准；批准后由 Agent 在已列明范围内连续执行，不要求用户逐步确认，也不转交用户手工执行。
 
 ## v1 更新规则
 
 `v1` 仅允许：
 
-- 人工更新；
+- 经人类批准后更新（批准后可由 Agent 代执行）；
 - 快进到已经发布并验证的 Release commit；
 - 禁止 force push；
 - 禁止删除；

@@ -44,7 +44,7 @@ AgenticWonderwall 是面向个人开发者的单 Agent GitHub Flow + Jujutsu 治
 
 ### 仅采用工作流 skill
 
-可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工保留操作）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。
+可以只复制 [skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md) 目录到采用项目的 skill 目录，让 Agent 通过加载一个 skill 获得完整工作流指导（任务路径、jj change 生命周期、验证、PR 流程、人工批准与聚合授权）。skill 是自包含的便携汇总，不替代采用项目自身的规则文件；采用者仍须填写项目事实、配置真实验证命令与 GitHub 保护，并按[采用指南](docs/adoption-guide.md)完成烟雾测试。发布与授权规则以 `core/policy.md` 与 `profiles/` 为权威来源（见 [core/policy.md](core/policy.md)）。
 
 所有采用方式都应按[采用指南](docs/adoption-guide.md)记录实际使用的 Release tag 或 commit SHA，而不是默认写入固定版本号。
 
@@ -156,7 +156,7 @@ GitHub 根据邮箱关联 Contributor 账户，Contributors 图表只统计最�
 
 日常采用本工作流时，不在本仓库为业务项目创建 Issue。只有修改 AgenticWonderwall 工作流本身时，才在本仓库记录维护任务。
 
-Agent 可以在已记录范围内实现、验证、push 和维护 Pull Request，但不得自行 merge 或 release。
+Agent 可以在已记录范围内实现、验证、push 和维护 Pull Request，但未经人类批准不得 merge 或 release；发布事务的聚合授权语义见 [core/policy.md](core/policy.md)。
 
 ## 来源
 

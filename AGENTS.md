@@ -2,6 +2,8 @@
 
 > 本文件是本仓库唯一具有约束力的通用工作流规则来源。
 > README、CONTRIBUTING、采用指南和其他材料只能解释或辅助执行，不能覆盖本文件。
+> 发布与授权规则由本文件引用的 [core/policy.md](core/policy.md) 定义（属于本工作流规则的组成部分），
+> 具体工具执行方式见 [profiles/git.md](profiles/git.md) 与 [profiles/jj.md](profiles/jj.md)。
 
 ## 项目事实
 
@@ -17,7 +19,7 @@
   bash scripts/check.sh
   ```
 - 合并方式：只接受人类决定的 Squash Merge
-- 自动 merge、release、部署与 `v1` 分支推进始终禁止 Agent 执行，只接受人类单独、明确决定
+- merge、release、部署与 `v1` 分支推进未经人类明确批准不得执行；人类一次批准完整发布事务（见 [core/policy.md](core/policy.md)）后，Agent 可在已列明范围内连续执行
 
 采用到其他项目时，应更新本节中的项目目标、技术栈、验证命令和受保护分支。
 
@@ -25,7 +27,7 @@
 
 1. 系统安全、法律与平台权限
 2. 项目安全、隐私、合规和数据保护要求
-3. 受保护分支、发布、部署和破坏性操作限制
+3. 受保护分支、发布、部署和破坏性操作限制（授权语义见 [core/policy.md](core/policy.md)）
 4. 根部 `AGENTS.md` 中的通用工作流规则
 5. 当前 Issue 或明确人类授权
 6. 项目架构、测试和交付资料
@@ -132,9 +134,11 @@ AI Agent/模型对本次变更产生实质贡献时，把它记录为共同作�
 
 每条意见直接说明具体问题、影响和所需修复。
 
-## 人工保留操作
+## 人工批准与聚合授权
 
-Agent 不得自行 merge、release、删除远端数据、执行破坏性操作或扩大范围。这些操作始终需要人类单独、明确决定。
+人类保留最终决定权，不表示人类必须亲自操作。Agent 不得未经批准执行 merge、release、删除远端数据、破坏性操作或扩大范围；取得人类明确批准后，Agent 可在批准范围内连续执行，不得把可由自身工具完成的操作转交人类手工执行。
+
+发布采用单一最终授权门：Agent 完成全部只读准备后提交一次完整发布审核，人类一次批准完整发布事务，Agent 连续执行并完成远端验证。聚合授权的定义、审核要素、失效条件、部分失败处理与术语对照见 [core/policy.md](core/policy.md)；Git 与 jj 下的安全执行方式见 [profiles/git.md](profiles/git.md) 与 [profiles/jj.md](profiles/jj.md)。
 
 Agent 不得把允许 push 或创建 Pull Request 解释为允许 merge 或 release。
 

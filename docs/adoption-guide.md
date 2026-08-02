@@ -93,7 +93,7 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 可以只复制仓库根部的 `skills/agentic-wonderwall/` 目录（`SKILL.md` 与
 `references/`）到采用项目的 skill 目录。加载该 skill 即可获得完整工作流指导：
 任务路径、jj change 与 bookmark 生命周期、验证入口、PR 流程、审查意见用语、
-人工保留操作与停止条件，详见 [skills/agentic-wonderwall/SKILL.md](../skills/agentic-wonderwall/SKILL.md)。
+人工批准与聚合授权、停止条件，详见 [skills/agentic-wonderwall/SKILL.md](../skills/agentic-wonderwall/SKILL.md)；发布与授权规则详见 [core/policy.md](../core/policy.md)。
 
 skill 是自包含的便携汇总，不替代采用项目自身的规则文件，也不构成第二套通用
 规则。采用者仍必须替换项目事实、配置真实验证命令与 GitHub 保护，并按
@@ -175,7 +175,7 @@ Merge）。`keep` 定制文件（`AGENTS.md` 等）不会被自动覆盖，需�
 
 根部 `AGENTS.md` 是权威规则，`skills/agentic-wonderwall/SKILL.md` 是便携
 汇总，两者必须同步覆盖相同的规则要点（验证入口、权威顺序、任务路径、
-jj change 与 bookmark、人工保留操作、Squash Merge、AI Contributors、
+jj change 与 bookmark、人工批准与聚合授权、Squash Merge、AI Contributors、
 Agent 自审、审查意见三类用语、冲突停止、安全与卫生、验证失败不得表述为
 成功等）。修改任一侧的规则要点时，必须同步另一侧。
 
