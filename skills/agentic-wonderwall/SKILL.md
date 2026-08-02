@@ -6,8 +6,9 @@ description: >-
   由本模板派生，或包含 scripts/check.sh、codex/ 前缀 bookmark 等特征）时使用。
   触发场景包括：用户提到“按工作流处理”“jj change / bookmark / Jujutsu 任务生命周期”
   “验证入口 scripts/check.sh”“复杂任务 Issue 表单”“Draft PR”“依赖任务队列”
-  “Squash Merge”“工作流采用或部署”；或在采用该工作流的仓库中开始任何任务、
-  处理冲突、同步 main 基线、创建或更新 Pull Request。加载本 skill 即可获得
+  “Squash Merge”“工作流采用或部署”“更新工作流内容”；或在采用该工作流的
+  仓库中开始任何任务、处理冲突、同步 main 基线、创建或更新 Pull Request。
+  加载本 skill 即可获得
   完整工作流指导，无需再查阅其他工作流文档。
 ---
 
@@ -34,6 +35,8 @@ jj change，通过短期 bookmark 跟踪，经权威验证与 Agent 自审后由
 2. 读取采用项目根部的 `AGENTS.md`（若存在）和本 skill；
 3. 运行 `jj status` 和 `jj log -n 5`；
 4. 确认工作区归属，不覆盖、删除或混入来源不明的修改。
+5. 若采用项目包含 `scripts/aw-update.sh`，运行 `bash scripts/aw-update.sh check`
+   检查工作流模板是否有上游更新；有更新时按[更新采用的工作流内容](#更新采用的工作流内容)处理。
 
 开始每个新任务前运行 `jj git fetch` 同步远端基线。
 
@@ -190,6 +193,28 @@ Agent 不得自行 merge、release、删除远端数据、执行破坏性操作�
 - `main` 只接受经 Pull Request 的人类决定 Squash Merge；
 - 发现当前操作违反已记录规则、权限或范围时，必须在产生外部影响前停止并
   请求人类修正或明确授权。
+
+## 更新采用的工作流内容
+
+模板仓库会持续演进，但采用项目的规则文件、脚本与 skill 是复制得到的快照，
+不会自动同步（唯一例外：中央 Actions 接口 `@v1` 由 CI 自动跟随，不受本
+更新机制影响）。需要更新时：
+
+1. 运行 `bash scripts/aw-update.sh check` 比较上游最新 Release tag 与本地
+   `.aw-update/VERSION`：退出码 0 表示已是最新；1 表示可更新；2 表示无法
+   确定（如离线）；提示“未记录本地版本”时说明采用时未初始化版本记录。
+2. 运行 `bash scripts/aw-update.sh diff` 查看差异摘要，向人类报告并询问
+   是否更新；不自行扩大范围或覆盖定制。
+3. 更新作为普通变更任务执行：创建一个 jj change，
+   `bash scripts/aw-update.sh apply --dry-run` 预览、`--yes` 应用（或
+   手工合并），阅读完整 diff、运行验证入口、创建 Pull Request，由人类
+   决定 Squash Merge。
+4. `keep` 文件（`AGENTS.md`、`CONTRIBUTING.md`、`.ai-contributors.yaml`、
+   `.github/workflows/check.yml`）永远不会被脚本覆盖：apply 只提示人工
+   合并差异；采用项目的“项目事实”（目标、技术栈、验证命令等）必须保留。
+5. 更新脚本不删除本地文件、不执行 merge、release 或远端修改；上游移除的
+   文件只提示，由人类决定。详细命令与 manifest 说明见与 `scripts/aw-update.sh`
+   一同同步的 `docs/update-guide.md`。
 
 ## 部署本 skill 到新项目
 
