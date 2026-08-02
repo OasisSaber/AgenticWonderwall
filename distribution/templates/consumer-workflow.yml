@@ -1,0 +1,24 @@
+name: Check
+
+on:
+  pull_request:
+    branches: ["{{default_branch}}"]
+    types: [opened, edited, reopened, synchronize]
+  push:
+    branches: ["{{default_branch}}"]
+  workflow_dispatch:
+
+permissions:
+  contents: read # Required only for checkout; PR data comes from the event payload.
+
+concurrency:
+  group: check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 调用 AW 中央治理检查（AgenticWonderwall /aw 接入生成；项目验证入口见
+  # with.project-check-path，由接入时选择的 validation_path 渲染）。
+  aw-check:
+    uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+    with:
+      project-check-path: "{{validation_path}}"

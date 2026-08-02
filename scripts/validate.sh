@@ -65,6 +65,11 @@ fi
 
 while IFS= read -r -d '' shell_file; do
     shell_file=${shell_file#./}
+    # 发布模板（distribution/templates/）不是仓库执行脚本：mode 由生成侧
+    # 消费项目决定，不要求本仓库以 100755 提交。
+    case "$shell_file" in
+        distribution/templates/*) continue ;;
+    esac
     mode=$(git ls-tree "$CHECK_REV" -- "$shell_file" 2>/dev/null | awk '{print $1}')
     if [ -z "$mode" ]; then
         echo "  NOT TRACKED: $shell_file (revision $CHECK_REV)"

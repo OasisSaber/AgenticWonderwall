@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "distribution_version": "v2.2.0",
+  "source_repository": "OasisSaber/AgenticWonderwall",
+  "source_commit": "88cc3e1290770e18a32da737f4b251e31a47ffb1",
+  "required": [
+    "core/workflow.md",
+    "core/policy.md"
+  ],
+  "components": {
+    "profiles": ["git", "jj"],
+    "adapters": ["generic", "trellis"]
+  },
+  "files": [
+    {
+      "source": "core/workflow.md",
+      "destination": "core/workflow.md",
+      "ownership": "managed-replace",
+      "required": true
+    },
+    {
+      "source": "core/policy.md",
+      "destination": "core/policy.md",
+      "ownership": "managed-replace",
+      "required": true
+    },
+    {
+      "source": "profiles/git.md",
+      "destination": "profiles/git.md",
+      "ownership": "managed-replace",
+      "required": false
+    },
+    {
+      "source": "profiles/jj.md",
+      "destination": "profiles/jj.md",
+      "ownership": "managed-replace",
+      "required": false
+    },
+    {
+      "source": "adapters/generic.md",
+      "destination": "adapters/generic.md",
+      "ownership": "managed-replace",
+      "required": false
+    },
+    {
+      "source": "adapters/trellis.md",
+      "destination": "adapters/trellis.md",
+      "ownership": "managed-replace",
+      "required": false
+    },
+    {
+      "source": "distribution/templates/agents-managed-block.md",
+      "destination": "AGENTS.md",
+      "ownership": "managed-block",
+      "required": true
+    },
+    {
+      "source": "distribution/templates/consumer-workflow.yml",
+      "destination": ".github/workflows/check.yml",
+      "ownership": "generated-if-missing",
+      "required": false
+    },
+    {
+      "source": "distribution/templates/project-check-placeholder.sh",
+      "destination": "scripts/check.sh",
+      "ownership": "generated-if-missing",
+      "required": false
+    }
+  ]
+}
