@@ -171,6 +171,18 @@ Merge）。`keep` 定制文件（`AGENTS.md` 等）不会被自动覆盖，需�
 4. 合并或移除重复的通用规则，避免不同文件同时声明最高权威。
 5. 根据现有技术栈配置验证脚本与持续集成，然后完成低风险演练。
 
+## 规则文件同步维护
+
+根部 `AGENTS.md` 是权威规则，`skills/agentic-wonderwall/SKILL.md` 是便携
+汇总，两者必须同步覆盖相同的规则要点（验证入口、权威顺序、任务路径、
+jj change 与 bookmark、人工保留操作、Squash Merge、AI Contributors、
+Agent 自审、审查意见三类用语、冲突停止、安全与卫生、验证失败不得表述为
+成功等）。修改任一侧的规则要点时，必须同步另一侧。
+
+`scripts/validate_skill_sync.py` 检测双向缺失，并作为验证入口的一部分
+（`bash scripts/check.sh` → `scripts/validate.sh` 的 Check 5）在 CI 中
+生效：任何一侧缺少规则要点都会使验证失败，阻止只有单侧更新的提交。
+
 ## 版本记录
 
 在采用项目的文档中记录：
