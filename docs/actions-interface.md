@@ -127,5 +127,6 @@ merge、release 或 deploy；修改 PR 必填标题；修改自审项文本导�
 ## 故障回退
 
 消费者在坏版本出现时临时固定上一正常 Release tag 或完整 SHA，等待 AW 发布
-前向修复；`v1` 分支由人类快进到已验证版本，不使用 force push 回写历史。
-具体流程见 [release-channels.md](release-channels.md)。
+前向修复；`v1` 兼容线已冻结（2026-08-02），不再快进，修复通过新版本通道
+发布（见 [release-channels.md](release-channels.md)）。不使用 force push 回写
+历史。

@@ -4,7 +4,7 @@ GitHub Template Repository 只复制仓库文件，不能保证这些服务器�
 
 - `main` 只能通过 Pull Request 修改，并要求 required check 状态检查通过。
 - 禁止 force push 和删除 `main`。
-- `v1` 分支（中央 Actions 接口兼容分支）只允许经人类批准的快进到已发布并验证的 Release commit（批准后可由 Agent 代执行）；禁止 force push、删除、Agent 凭据更新或直接在 `v1` 开发。
+- `v1` 分支（中央 Actions 接口兼容分支）已冻结（2026-08-02，指向承载 v2.0.0 内容的提交）：禁止推进、force push、删除、Agent 凭据更新或直接在 `v1` 开发。
 - 尽可能禁止管理员、GitHub App 和自动化绕过规则。
 - 只启用 Squash Merge，并禁用 auto-merge。
 - Actions 调用权限：reusable workflow 与调用器只授予 `contents: read`，不传递 Secrets，不使用 `pull_request_target`。

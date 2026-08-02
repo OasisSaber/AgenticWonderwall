@@ -107,7 +107,7 @@ jj git fetch --remote origin
 gh pr create --draft --base main --head <task-bookmark>
 ```
 
-Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。变更中有 AI Agent/模型实质参与时，按 [AGENTS.md](AGENTS.md) 的 AI Contributors 规则生成 `Co-authored-by` trailer 并汇总到 PR 描述，人类保持主要 commit author。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得未经批准 merge 或 release。发布（推进稳定分支、创建 tag、创建 Release 等）采用单一最终发布审核：授权语义见 [core/policy.md](core/policy.md)，Git 与 jj 下的安全执行方式见 [profiles/git.md](profiles/git.md) 与 [profiles/jj.md](profiles/jj.md)。
+Pull Request 应说明关联 Issue 或明确授权、实现结果、变更内容、验证证据、已知限制和未覆盖内容。Agent 完成自审后可以 push、创建或更新 Pull Request。只有人类可以决定是否 Squash Merge；Agent 不得未经批准 merge 或 release。发布（推进稳定分支、创建 tag、创建 Release 等）采用单一最终发布审核：授权语义见 [core/policy.md](core/policy.md)，Git 与 jj 下的安全执行方式见 [profiles/git.md](profiles/git.md) 与 [profiles/jj.md](profiles/jj.md)。
 
 同一 bookmark 再次 push 会更新现有 Pull Request。首次 push 后，change 已属于已发布历史；任何 restack 或内容更新都必须先取得明确人类授权，然后重新运行完整验证、阅读完整 diff，并再次 push 同一 bookmark。
 
@@ -191,10 +191,6 @@ jj git push --deleted --remote origin
 
 Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://docs.jj-vcs.dev/latest/bookmarks/)和[官方 CLI reference](https://docs.jj-vcs.dev/latest/cli-reference/)为准；本文件只描述本仓库在 Jujutsu `0.43.0` 上核对过的单 change 生命周期，更高版本采用前必须重新验证命令语义。
 
-## 可选依赖任务路径
-
-默认保持一次只推进一个任务。只有 Issue 明确声明有序依赖链时，才使用[依赖任务 Draft PR 工作流](docs/dependent-task-workflow.md)；该路径不会改变每任务独立 change、bookmark、PR、验证与人工合并边界。
-
 ## 中央接口变更
 
 本仓库同时维护治理规范与[中央 Actions 接口](docs/actions-interface.md)。中央接口变更视为公共 API 变更，`v1` 生命周期内不得移动工作流路径、删除或重命名输入、更改默认项目验证入口、更改 required check 公共名称、新增 Secret 或写权限。
@@ -204,5 +200,5 @@ Jujutsu bookmark 与 push 的详细语义以[官方 bookmark 文档](https://doc
 1. 对照 [docs/actions-interface.md](docs/actions-interface.md) 判断变更是否破坏 `v1` 承诺；破坏性调整只允许在下一主版本进行；
 2. 判断版本处理：不改变通过/失败结果的修复为 patch；新增可选输入或非阻断诊断为 minor；新增会让现有消费者失败的规则或重命名工作流、Job、输入、PR 字段为下一主版本；新增权限、Secret 或部署行为需要单独安全审查；
 3. 在独立[消费者 smoke 仓库](docs/release-channels.md)完成真实调用验证后再发布；
-4. Release tag 经人类批准后创建为不可变 annotated tag；`v1` 分支经人类批准后快进到已发布并验证的 Release commit（批准后可由 Agent 代执行），禁止 force push、删除、Agent 凭据更新或直接在 `v1` 开发；
-5. Agent 未经批准不得创建 Release、推进 `v1` 或修改 GitHub Ruleset。
+4. Release tag 经人类批准后创建为不可变 annotated tag；`v1` 兼容线已冻结（2026-08-02），不再推进、不创建新 v1.x tag；
+5. Agent 未经批准不得创建 Release 或修改 GitHub Ruleset。
