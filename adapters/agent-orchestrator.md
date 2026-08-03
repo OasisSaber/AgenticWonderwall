@@ -5,14 +5,20 @@
 > 实现。AO 特有概念（worker、session、worktree、reaction）只在本文件出现，
 > 不进入 Core。
 >
-> 目标平台（v3.1.0 起）：`Agent Orchestrator + OpenCode + Git worktree`。
+> v3.1.0 的正式候选路径是：`Agent Orchestrator + OpenCode + Git worktree`。
+> 在独立低风险仓库完成真实 smoke 并记录证据前，支持状态保持 `PARTIAL`。
 
 ## 1. AO 结构
 
-Agent Orchestrator 以 Project 为单位管理 Issue，并为每个 Issue 启动一个
-worker（Agent 运行时，默认 OpenCode）。worker 拥有独立的 session 与
-Git worktree，在短生命周期 branch 上工作，通过 Pull Request 交给人类
-审核。CI 失败与 Review 意见可通过 reaction 回传原 worker。
+AO 以 Project 为单位管理任务，并为每个 Issue 启动隔离 worker。AO 产品默认
+Agent 是 `claude-code`；本 Adapter 的项目级配置显式覆盖为 `opencode`。worker
+拥有独立 session 与 Git worktree，在短生命周期 branch 上工作，通过 Pull
+Request 交给人类审核。CI 失败与 Review 意见可通过 reaction 回传原 worker。
+
+AO 当前采用两层配置：全局 registry 保存项目身份，仓库根部的
+`agent-orchestrator.yaml` 保存 agent、runtime、workspace、规则与 reactions。
+新项目配置应使用扁平结构；顶层 `projects:` 包装仅作为旧格式兼容，不作为
+本 Adapter 的推荐写法。
 
 ## 2. 映射表
 
@@ -52,37 +58,46 @@ Issue assigned
 出现以下任一情况时 worker 必须停止并通知人类，不得继续：
 
 - 同一 Issue 已存在另一个活跃主 worker；
-- branch 或 worktree 冲突；
+- branch、worktree 或任务归属发生冲突；
 - Issue 范围发生变化；
 - PR 已合并或关闭；
 - Review 要求扩大到架构、公共接口、部署或数据迁移；
 - CI 重试达到上限；
-- 发现需要 merge、release、deploy 或删除远端资源。
+- 发现需要 merge、release、deploy 或删除远端资源；
+- TheMasterplan 必需文件缺失或加载顺序无法完成。
 
 ## 5. 使用方式
 
-采用项目启用 Agent Orchestrator 时：
+采用项目启用 AO 时：
 
-1. 在 AO 项目配置中按本仓库参考配置 `examples/agent-orchestrator.yaml`
-   设置 `defaults.agent: opencode`、`defaults.workspace: worktree`
-   （该文件是仓库内示例，不随分发 manifest 安装到采用项目）；
-2. 每个 Issue 只允许一个活跃 worker、一个 worktree、一个 branch、
-   一个 Pull Request（`core/workflow.md` §1 单一交付责任人）；
-3. worker 启动时 OpenCode 自动发现 `.opencode/skills/themasterplan/`
-   Skill，或由用户通过 `/themasterplan` 命令加载；加载顺序为
-   `AGENTS.md` → `core/workflow.md` → `core/policy.md` →
-   `profiles/git.md` → 本 Adapter，不复制 Core 正文；
-4. worker 每次 push 前必须运行项目权威验证入口（`core/workflow.md` §4），
-   创建或更新 Pull Request 前阅读完整 diff；
-5. `approved-and-green` reaction 必须保持 `auto: false`（只通知人类，
-   不自动 merge）；CI 失败与 changes requested 可回传原 worker 修复。
+1. 在仓库根部使用扁平的 `agent-orchestrator.yaml`，按
+   `examples/agent-orchestrator.yaml` 设置 `agent: opencode`、
+   `workspace: worktree`；运行 `ao start` 注册项目身份，不在项目配置中手写
+   `path`、`projectId`、`storageKey` 或 `originUrl`；
+2. Windows 使用 `runtime: process`；macOS / Linux 可按目标环境选择 `tmux`
+   或 `process`；
+3. 每个 Issue 只允许一个活跃 worker、一个 worktree、一个 branch、一个
+   Pull Request；
+4. worker 启动时由 OpenCode 自动发现
+   `.opencode/skills/themasterplan/SKILL.md`，或通过 `/themasterplan` 命令
+   使用原生 `skill` 工具加载；
+5. worker 每次 push 前运行项目权威验证入口，创建或更新 PR 前阅读完整 diff；
+6. `ci-failed` 与 `changes-requested` 可回传原 worker，在原任务范围内修复；
+7. `approved-and-green` 必须保持 `auto: false` 与 `action: notify`。
 
-## 6. 边界
+## 6. 自动合并语义
 
-- 本 Adapter 不改变 core/policy.md 的授权语义与人类审批门；
-- 不改变 profiles/ 的发布命令；AO 环境下的发布执行仍按 `profiles/git.md`；
-- `approved-and-green` 的 `auto: true` 配置无效，不得启用自动 merge；
+AO 当前文档将 `auto-merge` 定义为保留的 merge intent：它目前按通知路径处理，
+不会绕过分支保护、审批或失败检查，也不应被当成现阶段可依赖的自动合并实现。
+TheMasterplan 仍明确禁止为 `approved-and-green` 配置 `action: auto-merge`，因为
+最终 merge 决定必须由人类保留，并且未来 AO 可能扩展该 intent 的实际能力。
+
+## 7. 边界
+
+- 本 Adapter 不改变 `core/policy.md` 的授权语义与人类审批门；
+- 不改变 `profiles/` 的发布命令；AO 环境下发布仍按 `profiles/git.md`；
 - worker 不得自动 merge、release、deploy、删除远端 branch/tag/Release、
-  force push 已发布历史或扩大 Issue 范围；
-- OpenCode Skill 与命令是薄加载器，缺失必需文件时报告未完整安装并停止，
-  不得静默推断完整规则。
+  force-push 已发布历史或扩大 Issue 范围；
+- OpenCode Skill 与命令是薄加载器，缺失必需文件时必须停止；
+- `.opencode/` 入口当前不由分发 manifest 自动安装，采用项目必须显式复制或
+  通过模板仓库获得。

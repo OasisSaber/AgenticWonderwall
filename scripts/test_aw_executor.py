@@ -41,9 +41,13 @@ class _SourceMixin:
         return resolve_local(PACKAGE_ROOT, commit=TEST_COMMIT)
 
 
+MANIFEST_VERSION = load_manifest(
+    REPO_ROOT / "distribution" / "manifest.json"
+)["distribution_version"]
+
 STATE_JSON = {
     "schema_version": 1,
-    "source": {"repository": "OasisSaber/TheMasterplan", "version": "v3.0.0", "commit": "a" * 40},
+    "source": {"repository": "OasisSaber/TheMasterplan", "version": MANIFEST_VERSION, "commit": "a" * 40},
     "selection": {"profile": "jj", "adapter": "trellis", "validation_path": "scripts/check.sh", "default_branch": "main"},
     "managed_files": {},
     "adoption": {"date": "2026-08-02", "platform": "linux", "git_version": "2.40", "jj_version": "0.43", "status": "PARTIAL"},
@@ -277,7 +281,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         self.assertEqual(applied2["unchanged"], applied["written"])
 
         # inspect now reports CURRENT
-        status, issues = detect_status(self.root, target_version="v3.0.0")
+        status, issues = detect_status(self.root, target_version=MANIFEST_VERSION)
         self.assertEqual(status, "CURRENT", issues)
 
     def test_existing_agents_block_preserved_and_replaced(self) -> None:
@@ -347,7 +351,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         # byte-level hashes of the untouched block.
         agents = self.root / "AGENTS.md"
         agents.write_bytes(agents.read_bytes() + b"\n- \xe9\xa1\xb9\xe7\x9b\xae\xe5\x90\x8d: Demo\n")
-        status, issues = detect_status(self.root, target_version="v3.0.0")
+        status, issues = detect_status(self.root, target_version=MANIFEST_VERSION)
         self.assertEqual(status, "CURRENT", issues)
         report = verify(self.root)
         self.assertTrue(report["ok"], report["issues"])
@@ -361,7 +365,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         agents = self.root / "AGENTS.md"
         data = agents.read_bytes()
         agents.write_bytes(data.replace(b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f", b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f\xef\xbc\x88\xe5\xb7\xb2\xe7\xaf\xa1\xe6\x94\xb9\xef\xbc\x89", 1))
-        status, issues = detect_status(self.root, target_version="v3.0.0")
+        status, issues = detect_status(self.root, target_version=MANIFEST_VERSION)
         self.assertEqual(status, "MODIFIED", issues)
         report = verify(self.root)
         self.assertFalse(report["ok"], "verify must fail when block is modified")

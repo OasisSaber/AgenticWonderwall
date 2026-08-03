@@ -6,152 +6,183 @@
 
 ## 支持矩阵
 
-| 平台组合 | 状态 | 说明 |
+| 平台组合 | 当前状态 | 说明 |
 |---|---|---|
-| Agent Orchestrator + OpenCode + Git worktree | `VERIFIED*` | v3.1.0 正式支持路径；*以完成阶段 G 真实 smoke 为前提，采用时必须在目标环境完成一次真实 smoke |
-| Agent Orchestrator + OpenCode + Jujutsu colocated workspace | `PARTIAL` | 未完成独立真实 smoke 前不宣称已验证 |
-| Windows / macOS 原生环境 | `PARTIAL` | 未完成真实 smoke 前不宣称已验证（Ubuntu GitHub Actions 为 `VERIFIED`） |
+| Agent Orchestrator + OpenCode + Git worktree | `PARTIAL` | 代码与静态契约完成，等待独立低风险仓库真实 smoke；记录证据后才可改为 `VERIFIED` |
+| Agent Orchestrator + OpenCode + Jujutsu colocated workspace | `PARTIAL` | 尚未完成独立真实 smoke |
+| Windows / macOS 原生环境 | `PARTIAL` | 目标平台必须单独完成 smoke；上游 Ubuntu CI 不能替代原生平台验证 |
 
-正式声明 `VERIFIED` 以完成阶段 G 真实 smoke（独立低风险仓库端到端演练）为
-前提。本实现交付后、smoke 完成前，采用项目应自行在目标环境完成 smoke，
-不得仅因本仓库提供入口就宣称已验证。
+真实 smoke 通过前，不得使用 `VERIFIED*`、脚注式 VERIFIED 或其他方式提前
+宣称验证完成。
+
+## 配置模型
+
+AO 当前使用两层配置：
+
+- 全局 registry：由 AO 管理项目身份、路径和仓库信息；
+- 仓库根部 `agent-orchestrator.yaml`：管理 agent、runtime、workspace、规则、
+  setup 与 reactions。
+
+新项目的本地配置应使用扁平结构。旧的顶层 `projects:` 包装仍可能兼容，但不应
+作为新集成示例。运行 `ao start` 从仓库根部注册项目，不要在本地配置中手工
+写入 `path`、`projectId`、`storageKey` 或 `originUrl`。
 
 ## 安装步骤
 
-1. 采用 TheMasterplan 基础集合：根部 `AGENTS.md`、`core/`、`profiles/git.md`
-   （Git 是 AO 默认路径）、`adapters/agent-orchestrator.md`；采用方式与边界
-   见 [adoption-guide.md](adoption-guide.md)。
-2. 复制 OpenCode 入口到业务仓库：
+1. 采用根部 `AGENTS.md`、`core/`、`profiles/git.md` 和
+   `adapters/agent-orchestrator.md`。
+2. 显式复制 OpenCode 入口：
 
    ```text
    .opencode/skills/themasterplan/SKILL.md
    .opencode/commands/themasterplan.md
    ```
 
-   OpenCode 会在项目 `.opencode/` 下自动发现 `skills/*/SKILL.md`，命令文件
-   名即斜杠命令名（`themasterplan.md` → `/themasterplan`）。
-3. 按 [examples/agent-orchestrator.yaml](../examples/agent-orchestrator.yaml)
-   配置 AO 项目（该文件是本仓库参考示例，不随分发 manifest 安装到采用
-   项目）。关键项：
+   这两个文件当前不由 distribution manifest 自动安装。
+3. 把 `examples/agent-orchestrator.yaml` 复制为仓库根部
+   `agent-orchestrator.yaml`，替换项目专属内容。
+4. 在仓库根部运行：
 
-   ```yaml
-   defaults:
-     agent: opencode
-     workspace: worktree
+   ```bash
+   ao start
+   ao doctor
+   ao status
    ```
 
-4. 配置 reaction：`ci-failed` 与 `changes-requested` 可设为
-   `send-to-agent`（回传原 worker）；`approved-and-green` **必须**保持
-   `auto: false` + `action: notify`，不得改为自动 merge。
-5. 由人类在 GitHub 配置 `main` 分支保护（只接受 Pull Request、required
-   check、只启用 Squash Merge），见 [repository-settings.md](repository-settings.md)。
+5. 由人类配置 `main` 分支保护、required checks 与 Squash Merge。
 
-## OpenCode Skill 与命令路径
+## 推荐配置
 
-- Skill：`.opencode/skills/themasterplan/SKILL.md`（frontmatter
-  `name: themasterplan`，须与目录名一致）
-- 命令：`.opencode/commands/themasterplan.md`（`/themasterplan`，支持
-  `$ARGUMENTS` 附加上下文）
-- 产品规范名称仍为 `/TheMasterplan`；不恢复 `/aw` 为规范入口；不支持
-  错误拼写 `/Themasterplane`
+```yaml
+$schema: https://raw.githubusercontent.com/AgentWrapper/agent-orchestrator/main/schema/config.schema.json
 
-两者都是薄加载器：只声明加载顺序
-（`AGENTS.md` → `core/workflow.md` → `core/policy.md` → `profiles/git.md`
-→ `adapters/agent-orchestrator.md`）与自动化边界，不复制 Core 正文；
-缺失必需文件时报告未完整安装并停止。
+agent: opencode
+runtime: process
+workspace: worktree
+defaultBranch: main
 
-## AO 配置
+agentRulesFile: AGENTS.md
+agentRules: |
+  Before changing files, read core/workflow.md, core/policy.md,
+  profiles/git.md, and adapters/agent-orchestrator.md.
 
-- 一个 Issue 只对应一个 worker、一个 worktree、一个短生命周期 branch、
-  一个 Pull Request；
-- worker 可实现、验证、push 自己的任务 branch、创建或更新自己的 PR、
-  在范围内修复 CI 失败与 Review 意见；
-- `approved-and-green` 的 `auto: true` 配置无效，禁止自动 merge；
-- worker 不得自动 merge、release、deploy、删除远端 branch/tag/Release、
-  force push 已发布历史或扩大 Issue 范围。
+opencodeIssueSessionStrategy: reuse
 
-## Git worktree 说明
+reactions:
+  ci-failed:
+    auto: true
+    action: send-to-agent
+    retries: 2
+  changes-requested:
+    auto: true
+    action: send-to-agent
+    retries: 2
+    escalateAfter: "30m"
+  approved-and-green:
+    auto: false
+    action: notify
+    priority: action
+```
 
-AO 默认 `workspace: worktree`：每个 Issue 一个隔离工作区，对应一个
-短生命周期 branch。采用 Git 时遵循 [profiles/git.md](../profiles/git.md)
-的发布执行规则；任务 change 卫生（不维护长期开发分支、push 前完整 diff
-审阅）见 [core/workflow.md](../core/workflow.md) §3、§5。
+AO 默认 Agent 是 `claude-code`；这里显式选择 `opencode`。`worktree` 是默认、
+推荐的隔离方式。Windows 建议 `runtime: process`；macOS / Linux 通常可使用
+`tmux`，也可按目标环境选 `process`。
 
-## CI 与 Review reaction
+## OpenCode Skill 与命令
+
+- Skill：`.opencode/skills/themasterplan/SKILL.md`
+- 命令：`.opencode/commands/themasterplan.md`
+- 产品规范名称：`/TheMasterplan`
+- OpenCode 实际命令：`/themasterplan`
+
+OpenCode 从 `.opencode/skills/<name>/SKILL.md` 发现 Skill，并通过原生 `skill`
+工具按需加载。自定义命令文件名决定斜杠命令名，`$ARGUMENTS` 会接收调用参数。
+
+Skill 在任何写操作前核对：
+
+```text
+AGENTS.md
+core/workflow.md
+core/policy.md
+profiles/git.md
+adapters/agent-orchestrator.md
+```
+
+缺失任一文件时报告“TheMasterplan 未完整安装”并停止。
+
+## 任务与责任边界
+
+一个 Issue 只对应：
+
+- 一个活跃 worker；
+- 一个 worktree；
+- 一个短生命周期 branch；
+- 一个 Pull Request。
+
+worker 可以实现、验证、push、创建或更新自己的 PR，并在原范围内处理 CI 和
+Review 意见。以下情况必须停止：重复 worker、工作区冲突、PR 已关闭或合并、
+任务范围扩大、重试达到上限、需要 merge/release/deploy/远端删除。
+
+## Reactions 与合并门
 
 | Reaction | 建议配置 | 语义 |
 |---|---|---|
-| `ci-failed` | `auto: true` + `send-to-agent` + `retries: 2` | CI 失败回传原 worker，在原任务范围内修复并重跑 |
-| `changes-requested` | `auto: true` + `send-to-agent` | Review 修改意见回传原 worker，在原范围内处理，不创建第二个 PR |
+| `ci-failed` | `auto: true` + `send-to-agent` + `retries: 2` | CI 失败回传原 worker |
+| `changes-requested` | `auto: true` + `send-to-agent` + `retries: 2` + `escalateAfter: "30m"` | Review 意见回传，超限后升级给人类 |
 | `approved-and-green` | `auto: false` + `notify` | 只通知人类，由人类决定 Squash Merge |
 
-CI 重试达到上限、Review 要求扩大到架构/公共接口/部署/数据迁移等停止条件
-见 `adapters/agent-orchestrator.md` §4。
+AO 当前把 `auto-merge` 视为保留的 merge intent，并按通知路径处理；它不会绕过
+分支保护、审批或失败检查。TheMasterplan 仍禁止配置 `action: auto-merge`，以
+保留人类最终合并门，并避免依赖未来可能变化的实现语义。
 
-## Windows 路径注意事项
+## Git worktree 与清理
 
-- AO 项目配置中的 `path` 使用 Windows 绝对路径时，YAML 中建议加引号，
-  例如 `path: "D:/Projects/my-project"`；
-- 验证入口与命令按 [AGENTS.md](../AGENTS.md) 使用
-  `bash scripts/check.sh`（Git Bash）；PowerShell 7 使用委托入口
-  `pwsh -NoProfile -File scripts/check.ps1`；
-- 工作区检出导致 `scripts/*.sh` 模式位变化（100755 → 100644）时，提交前
-  恢复可执行位，否则 `validate.sh` 的 Check 2（提交模式检查）会失败。
+每个 Issue 使用独立 Git worktree。合并后先确认：
+
+- PR 已合并；
+- worktree 无未提交修改；
+- session 不再运行；
+- branch 没有需要保留的独有提交。
+
+再执行 AO 或 Git 的清理操作。不得为了清理而 force push、删除未核对的远端
+引用或重写已发布历史。
+
+## Windows 注意事项
+
+- 在仓库根部运行 `ao start` 让 AO 注册实际路径，不在项目配置中硬编码路径；
+- 使用 `runtime: process`；
+- 权威验证仍是 `bash scripts/check.sh`，PowerShell 入口只委托同一 Bash 验证；
+- 提交前检查 shell 文件可执行位，防止 100755 → 100644 的无意变化。
 
 ## 故障排查
 
 | 现象 | 处理 |
 |---|---|
-| OpenCode 不显示 themasterplan Skill | 确认路径为 `.opencode/skills/themasterplan/SKILL.md`（复数 `skills`）；frontmatter 含 `name`/`description`，`name` 与目录名一致 |
-| `/themasterplan` 命令无效 | 确认文件为 `.opencode/commands/themasterplan.md`；文件名为小写命令名 |
-| worker 报告"未完整安装" | 按加载顺序补齐缺失文件（`AGENTS.md`、`core/`、`profiles/git.md`、`adapters/agent-orchestrator.md`） |
-| required check 不触发 | 确认业务仓库 `.github/workflows/check.yml` 调用 `aw-check.yml` 且 `policy-ref` 与 `uses` 版本一致（见 [actions-interface.md](actions-interface.md)） |
-| 验证入口失败 | 以 `bash scripts/check.sh` 输出为准修复；不得把失败表述为成功 |
+| OpenCode 不显示 Skill | 检查 `.opencode/skills/themasterplan/SKILL.md`、frontmatter 和 skill 权限 |
+| `/themasterplan` 不可用 | 检查 `.opencode/commands/themasterplan.md` 和文件名大小写 |
+| AO 配置无法解析 | 使用最新 `$schema`，执行 `ao doctor`；确认使用扁平项目配置 |
+| worker 报告未完整安装 | 按加载顺序补齐文件，不得跳过 |
+| 同一 Issue 出现重复 session | 使用 `opencodeIssueSessionStrategy: reuse`，人工核对归属后清理重复项 |
+| required check 不触发 | 检查业务仓库 reusable workflow 固定版本及 `policy-ref` 一致性 |
 
 ## 卸载和回滚
 
-- 卸载：删除业务仓库 `.opencode/` 下的 Skill 与命令文件、AO 项目配置中的
-  agentRules 与 reactions；保留或不保留 `adapters/agent-orchestrator.md`
-  均可（不影响仓库验证）。
-- 回滚：版本固定回退到上一已知正常的 TheMasterplan tag 或完整 commit SHA
-  （`uses` 与 `policy-ref` 同步回退）；AO 侧恢复原本地 CI。
-- 上游修复发布新版本（如 `v3.1.1`），不删除、不移动、不重写已发布 tag。
+- 删除项目 `.opencode/` 下的 TheMasterplan Skill 与命令；
+- 删除或还原 `agent-orchestrator.yaml` 中的 TheMasterplan 规则与 reactions；
+- reusable workflow 回退时，`uses` 与 `policy-ref` 必须固定到同一个已知正常
+  Tag 或完整 SHA；
+- 上游发布前向修复，不移动或重写旧 Tag。
 
-## 版本固定建议
+## v3.1.0 真实 smoke
 
-业务仓库必须固定版本，`uses` 引用版本与 `policy-ref` 必须一致：
+状态：**待执行**。
 
-```yaml
-jobs:
-  check:
-    name: check
-    permissions:
-      contents: read
-    uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v3.1.0
-    with:
-      policy-ref: v3.1.0
-      project-check-path: scripts/check.sh
-```
+必须完成并记录：
 
-禁止 `uses: ...@v3.1.0` + `policy-ref: v1` 的混合配置；不建议省略
-`policy-ref`（默认值仍为 `v1`）。发布通道说明见
-[release-channels.md](release-channels.md)。
-
-## 真实 smoke 记录（阶段 G）
-
-> 状态：**待执行**。截至 v3.1.0 实现交付，独立低风险仓库
-> `OasisSaber/themasterplan-ao-smoke` 的真实 smoke 尚未执行；执行后在
-> 本节省略记录。正式宣布 AO 支持 `VERIFIED` 以本节完成为前提。
-
-待执行场景清单：
-
-- [ ] 正常任务：创建 Issue → AO 启动 worker → 自动加载 Skill → 修改低风险
-      文件 → 验证 → push → 创建 Draft PR → CI 通过 → approved-and-green
-      仅通知 → 人类 Squash Merge → cleanup
-- [ ] CI 失败：制造失败 → ci-failed reaction 回传原 worker → 修复并重跑
-- [ ] Review 请求修改：人类提交 changes requested → 回传原 worker →
-      原范围内修复 → 不创建第二个 PR
-- [ ] 范围扩大：Review 要求架构或额外功能 → worker 停止 → 请求新 Issue
-      或明确扩展授权
-- [ ] 禁止操作：确认 worker 不会 merge、release、deploy、删除远端 branch、
-      force push、修改其他 Issue
+- [ ] 正常 Issue → worker/worktree → Skill → PR → CI → 人类 merge → cleanup；
+- [ ] CI 失败回传原 worker并修复；
+- [ ] changes requested 回传原 worker；
+- [ ] 范围扩大时停止；
+- [ ] approved-and-green 只通知，不触发合并；
+- [ ] 重复 session 与关闭 PR 的停止条件有效；
+- [ ] Windows 或实际目标平台单独通过 smoke。
