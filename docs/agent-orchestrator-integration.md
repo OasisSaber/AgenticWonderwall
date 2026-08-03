@@ -84,6 +84,10 @@ reactions:
     priority: action
 ```
 
+> 完整 `agentRules`（一 Issue 一 worker/一 PR、禁止 merge/release/deploy、
+> 验证与 diff 审阅要求）以 `examples/agent-orchestrator.yaml` 为准；此处为
+> 最小示意，复制配置时使用完整版。
+
 AO 默认 Agent 是 `claude-code`；这里显式选择 `opencode`。`worktree` 是默认、
 推荐的隔离方式。Windows 建议 `runtime: process`；macOS / Linux 通常可使用
 `tmux`，也可按目标环境选 `process`。
