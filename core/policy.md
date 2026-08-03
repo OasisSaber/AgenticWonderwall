@@ -1,6 +1,6 @@
 # Core Policy：授权与发布
 
-> 本文件是 AgenticWonderwall 工作流中"人类批准"与"发布执行"的权威规则来源。
+> 本文件是 TheMasterplan 工作流中"人类批准"与"发布执行"的权威规则来源。
 > 根部 `AGENTS.md` 引用本文件；`profiles/git.md` 与 `profiles/jj.md` 规定
 > 具体工具（Git / jj）下的安全执行方式。
 >

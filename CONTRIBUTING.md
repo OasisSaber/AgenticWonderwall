@@ -1,4 +1,4 @@
-# Contributing to AgenticWonderwall
+# Contributing to TheMasterplan
 
 仅在修改工作流本身时维护本仓库。开始前读取 [AGENTS.md](AGENTS.md)，并在以下两条任务路径中选择一条。
 

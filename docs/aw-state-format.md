@@ -1,9 +1,9 @@
 # `.aw` 状态目录与格式
 
-> 本文档描述 `/aw`（AgenticWonderwall 的简写；实际调用与文件命名一律使用
-> 全称 `AgenticWonderwall`）接入后在采用项目生成的 `.aw/` 目录结构与
+> 本文档描述 `/TheMasterplan`（TheMasterplan 的简写；实际调用与文件命名一律使用
+> 全称 `TheMasterplan`）接入后在采用项目生成的 `.aw/` 目录结构与
 > `.aw/state.json` 格式。执行器实现见
-> `skills/agentic-wonderwall/scripts/`（`aw.py` + `awlib/`）。
+> `skills/themasterplan/scripts/`（`aw.py` + `awlib/`）。
 
 ## 目录结构
 
@@ -20,8 +20,8 @@
 {
   "schema_version": 1,
   "source": {
-    "repository": "OasisSaber/AgenticWonderwall",
-    "version": "v2.2.0",
+    "repository": "OasisSaber/TheMasterplan",
+    "version": "v3.0.0",
     "commit": "<full-sha>"
   },
   "selection": {

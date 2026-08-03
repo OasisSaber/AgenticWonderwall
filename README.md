@@ -1,8 +1,8 @@
-# AgenticWonderwall
+# TheMasterplan
 
 A minimal single-Agent workflow for GitHub and Jujutsu.
 
-AgenticWonderwall 是面向个人开发者的“单一交付责任人的 AI 辅助代码交付治理协议”（GitHub Flow + Jujutsu 适配），并提供集中维护、版本化发布的 GitHub Actions 可重用工作流接口。
+TheMasterplan 是面向个人开发者的“单一交付责任人的 AI 辅助代码交付治理协议”（GitHub Flow + Jujutsu 适配），并提供集中维护、版本化发布的 GitHub Actions 可重用工作流接口。
 
 它不是 Agent 服务、多 Agent 编排平台、Web 或 API 服务、CLI 产品、Agent 运行时、自动发布机器人、项目管理系统；不自动 merge 或 release。允许研究/实现/检查子代理与多个模型参与，但只能有一个主交付责任人控制任务最终范围、VCS、最终验证、push、Pull Request、发布授权执行与人类交接。
 
@@ -42,7 +42,7 @@ AgenticWonderwall 是面向个人开发者的“单一交付责任人的 AI 辅�
 ### 最小采用集合（含薄 Skill）
 
 最小采用集合为：根部 `AGENTS.md`、`core/`、所需 `profiles/` 与可选
-`adapters/`；[skills/agentic-wonderwall](skills/agentic-wonderwall/SKILL.md)
+`adapters/`；[skills/themasterplan](skills/themasterplan/SKILL.md)
 是客户端加载入口，不是完整规则本体——仅复制 Skill 不构成完整采用，必须
 同时采用上述仓库规则文件。Skill 加载后会检测 AW 文件、声明加载顺序与权威
 来源，并在 `AGENTS.md`、`core/` 或所需 Profile 缺失时提示“AW 未完整安装”。
@@ -114,7 +114,7 @@ jobs:
     name: check
     permissions:
       contents: read
-    uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+    uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v1
     with:
       project-check-path: scripts/check.sh
 ```
@@ -127,13 +127,13 @@ AW 负责工作流治理、PR 合规检查、安全基线与调用约束；业�
 
 ## 维护边界
 
-日常采用本工作流时，不在本仓库为业务项目创建 Issue。只有修改 AgenticWonderwall 工作流本身时，才在本仓库记录维护任务。
+日常采用本工作流时，不在本仓库为业务项目创建 Issue。只有修改 TheMasterplan 工作流本身时，才在本仓库记录维护任务。
 
 Agent 可以在已记录范围内实现、验证、push 和维护 Pull Request，但未经人类批准不得 merge 或 release；发布事务的聚合授权语义见 [core/policy.md](core/policy.md)。
 
 ## 来源
 
-AgenticWonderwall 整理自
+TheMasterplan 整理自
 [OasisSaber/agentic-project-workflow](https://github.com/OasisSaber/agentic-project-workflow)
 的最终接受基线。
 

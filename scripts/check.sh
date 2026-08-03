@@ -1,5 +1,5 @@
 #!/bin/bash
-# Authoritative repository validation entrypoint for AgenticWonderwall.
+# Authoritative repository validation entrypoint for TheMasterplan.
 
 set -o pipefail
 

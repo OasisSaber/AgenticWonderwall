@@ -1,4 +1,4 @@
-"""Machine-checkable project state detection for the /aw executor.
+"""Machine-checkable project state detection for the /TheMasterplan executor.
 
 Classifies a project as one of ABSENT / INCOMPLETE / CURRENT / OUTDATED /
 MODIFIED / BROKEN based on file presence, state.json and content hashes.

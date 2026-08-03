@@ -1,27 +1,48 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "AgenticWonderwall distribution manifest",
-  "description": "Describes the files shipped in an AW release package. The manifest does not copy rule bodies; it only declares file responsibilities, ownership and selection.",
+  "title": "TheMasterplan distribution manifest",
+  "description": "Declares immutable TheMasterplan distribution identity, components, ownership, and package file mappings.",
   "type": "object",
-  "required": ["schema_version", "distribution_version", "source_commit", "files"],
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "distribution_version",
+    "source_repository",
+    "files"
+  ],
   "properties": {
-    "schema_version": { "const": 1 },
-    "distribution_version": { "type": "string", "minLength": 1 },
-    "source_repository": { "type": "string" },
-    "source_commit": {
+    "schema_version": {
+      "const": 1
+    },
+    "distribution_version": {
       "type": "string",
-      "pattern": "^[0-9a-f]{40}$",
-      "description": "Full commit SHA of the release source."
+      "pattern": "^v\\d+\\.\\d+\\.\\d+(?:[-+][A-Za-z0-9_.-]+)?$"
+    },
+    "source_repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
     },
     "required": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "components": {
       "type": "object",
       "properties": {
-        "profiles": { "type": "array", "items": { "type": "string" } },
-        "adapters": { "type": "array", "items": { "type": "string" } }
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "files": {
@@ -29,15 +50,31 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["source", "destination", "ownership"],
+        "required": [
+          "source",
+          "destination",
+          "ownership"
+        ],
         "properties": {
-          "source": { "type": "string", "minLength": 1 },
-          "destination": { "type": "string", "minLength": 1 },
-          "ownership": {
+          "source": {
             "type": "string",
-            "enum": ["managed-replace", "managed-block", "generated-if-missing", "project-owned"]
+            "minLength": 1
           },
-          "required": { "type": "boolean" }
+          "destination": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ownership": {
+            "enum": [
+              "managed-replace",
+              "managed-block",
+              "generated-if-missing",
+              "project-owned"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          }
         }
       }
     }

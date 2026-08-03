@@ -1,4 +1,4 @@
-# AgenticWonderwall 采用指南
+# TheMasterplan 采用指南
 
 ## 工具与平台基线
 
@@ -47,7 +47,7 @@ jobs:
     name: check
     permissions:
       contents: read
-    uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+    uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v1
     with:
       project-check-path: scripts/check.sh
 ```
@@ -85,7 +85,7 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 ### 最小采用集合（含薄 Skill）
 
 最小采用集合为：根部 `AGENTS.md`、`core/`、所需 `profiles/` 与可选
-`adapters/`；`skills/agentic-wonderwall/`（`SKILL.md` 与 `references/`）是
+`adapters/`；`skills/themasterplan/`（`SKILL.md` 与 `references/`）是
 客户端加载入口，不是完整规则本体——仅复制 Skill 不构成完整采用。Skill
 加载后会检测 AW 文件、声明加载顺序与权威来源，并在 `AGENTS.md`、`core/`
 或所需 Profile 缺失时提示“AW 未完整安装”，不静默推断完整规则。采用者仍
@@ -144,7 +144,7 @@ profiles/git.md”）。
 - [ ] 若要删除仍存在的远端 bookmark，另行记录明确人类决定，先 dry-run，再执行远端删除。
 - [ ] 将演练任务、PR、合并提交、验证结果和任何平台限制写入采用记录。
 
-只有目标平台的完整烟雾测试通过后，才能把该平台从 `PARTIAL` 记录为采用项目自身的 `VERIFIED`。这不会自动扩大 AgenticWonderwall 上游仓库的验证范围。
+只有目标平台的完整烟雾测试通过后，才能把该平台从 `PARTIAL` 记录为采用项目自身的 `VERIFIED`。这不会自动扩大 TheMasterplan 上游仓库的验证范围。
 
 任一步出现 conflicted bookmark、push 拒绝、未经确认的远端差异或范围扩大时，烟雾测试失败并停止；不得靠强推、自动冲突解决或跳过验证继续。
 
@@ -161,7 +161,7 @@ profiles/git.md”）。
 在采用项目的文档中记录：
 
 ```markdown
-来源: AgenticWonderwall <release-tag-or-full-commit-sha>
+来源: TheMasterplan <release-tag-or-full-commit-sha>
 采用范围: <中央调用 / 完整模板 / 最小采用集合（AGENTS.md + core/ + profiles/…）/ 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>

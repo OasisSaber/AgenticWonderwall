@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the minimum AgenticWonderwall consumer contract.
+"""Validate the minimum TheMasterplan consumer contract.
 
 Mechanically verifies that a caller repository satisfies the adoption
 contract required by the central Actions interface:
@@ -90,7 +90,7 @@ def main() -> int:
     check_path = validate_relative_path(sys.argv[2])
     require_tracked_file(root, check_path)
 
-    print("AgenticWonderwall consumer contract is valid.")
+    print("TheMasterplan consumer contract is valid.")
     return 0
 
 

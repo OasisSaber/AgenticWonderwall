@@ -1,6 +1,6 @@
-"""/aw executor package: deterministic file operations for AW adoption.
+"""/TheMasterplan executor package: deterministic file operations for AW adoption.
 
-This package implements the deterministic executor layer of the /aw unified
+This package implements the deterministic executor layer of the /TheMasterplan unified
 entrypoint. The Skill layer understands and orchestrates; this layer performs
 inspect / plan-adopt / apply-adopt / verify with machine-checkable results.
 

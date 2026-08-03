@@ -1,6 +1,6 @@
 # Trellis Adapter：mindfold-ai/Trellis 映射
 
-> 本文件规定 AgenticWonderwall 核心规则到 [mindfold-ai/Trellis]
+> 本文件规定 TheMasterplan 核心规则到 [mindfold-ai/Trellis]
 > （agent harness，下称 Trellis）的映射，是 `adapters/generic.md`
 > 的一个具体实现。Trellis 特有概念（spec、task、workspace、4 阶段循环）
 > 只在本文件出现，不进入 Core。

@@ -1,6 +1,6 @@
 # 版本通道
 
-AgenticWonderwall 中央 Actions 接口使用以下版本通道：
+TheMasterplan 中央 Actions 接口使用以下版本通道：
 
 ```text
 main        AW 开发与自测
@@ -12,13 +12,13 @@ v1.1.0      不可变 Release tag
 ## 默认调用
 
 ```yaml
-uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v1
 ```
 
 ## 严格固定
 
 ```yaml
-uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1.1.0
+uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v1.1.0
 with:
   policy-ref: v1.1.0
   project-check-path: scripts/check.sh
