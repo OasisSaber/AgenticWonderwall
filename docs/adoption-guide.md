@@ -95,6 +95,29 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 profiles/git.md”）。
 
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
+
+### Agent Orchestrator 采用
+
+使用 Agent Orchestrator + OpenCode 的采用项目，在最小采用集合基础上追加：
+
+- `adapters/agent-orchestrator.md`（AO 术语映射与自动化边界，随分发 manifest
+  安装）；
+- `.opencode/skills/themasterplan/SKILL.md` 与
+  `.opencode/commands/themasterplan.md`（OpenCode 自动发现与 `/themasterplan`
+  命令入口，薄加载器，不复制 Core 正文；当前不由分发 manifest 自动安装，
+  必须显式复制或通过模板仓库获得）；
+- 仓库根部使用扁平的 `agent-orchestrator.yaml`：`agent: opencode`、
+  `workspace: worktree`；运行 `ao start` 注册项目身份，不在本地项目配置中
+  手工写入 `path`、`projectId`、`storageKey` 或 `originUrl`；
+  `approved-and-green` 保持 `auto: false`（只通知，不自动 merge）；
+  `ci-failed` 与 `changes-requested` 可回传原 worker。
+
+完整安装、配置、故障排查、卸载与真实 smoke 清单见
+[agent-orchestrator-integration.md](agent-orchestrator-integration.md)。
+Git worktree 与 Jujutsu 路径在各自完成独立真实 smoke 前均保持 `PARTIAL`。
+AO 当前把 `auto-merge` 作为保留的 merge intent 并按通知路径处理；
+TheMasterplan 仍禁止为 `approved-and-green` 配置 `action: auto-merge`，以保留
+人类最终合并门并避免依赖未来可能变化的实现语义。
 ## 新项目
 
 1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。

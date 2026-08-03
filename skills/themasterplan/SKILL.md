@@ -45,6 +45,13 @@ adapters/<adapter>.md（可选）
 
 这些是存储和代码兼容接口，不是用户调用命令。
 
+## Agent Orchestrator 环境
+
+Agent Orchestrator + OpenCode 环境下，worker 通过
+`.opencode/skills/themasterplan/SKILL.md` 自动发现本 Skill，或由用户通过
+`/themasterplan` 命令加载；加载顺序与自动化边界见
+`adapters/agent-orchestrator.md`，本 Skill 不复制其正文。
+
 ## 缺失处理
 
 缺失根部 `AGENTS.md`、`core/` 或所选 Profile 时，报告

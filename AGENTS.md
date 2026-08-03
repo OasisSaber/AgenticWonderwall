@@ -5,7 +5,7 @@
 > - 任务来源、工作区检查、验证真实性、diff 审阅、自审与交接：[core/workflow.md](core/workflow.md)
 > - 权限与聚合授权、外部写操作边界、人类审批门、发布事务、安全停止条件：[core/policy.md](core/policy.md)
 > - Git / jj 发布执行命令：[profiles/git.md](profiles/git.md)、[profiles/jj.md](profiles/jj.md)
-> - Harness 映射：[adapters/generic.md](adapters/generic.md)、[adapters/trellis.md](adapters/trellis.md)
+> - Harness 映射：[adapters/generic.md](adapters/generic.md)、[adapters/trellis.md](adapters/trellis.md)、[adapters/agent-orchestrator.md](adapters/agent-orchestrator.md)
 > 各层通过链接引用，不复制同一规则。README、CONTRIBUTING、采用指南和其他
 > 材料只能解释或辅助执行，不能覆盖本文件及其引用的规则。
 

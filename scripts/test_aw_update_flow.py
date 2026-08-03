@@ -35,6 +35,9 @@ from awlib.util import read_json, write_json_atomic  # noqa: E402
 
 PACKAGE_ROOT = REPO_ROOT
 TEST_COMMIT = "b" * 40
+MANIFEST_VERSION = load_manifest(
+    REPO_ROOT / "distribution" / "manifest.json"
+)["distribution_version"]
 
 
 def make_package_copy() -> Path:
@@ -110,11 +113,11 @@ class HttpServerTest(unittest.TestCase):
             source_mod.ARCHIVE_URL = url
             source_mod.API_COMMIT_URL = commit_url
             try:
-                src = resolve_remote("OasisSaber/TheMasterplan", "v3.0.0", cache, commit=TEST_COMMIT)
+                src = resolve_remote("OasisSaber/TheMasterplan", MANIFEST_VERSION, cache, commit=TEST_COMMIT)
             finally:
                 source_mod.ARCHIVE_URL = original_archive
                 source_mod.API_COMMIT_URL = original_api
-            self.assertEqual(src.version, "v3.0.0")
+            self.assertEqual(src.version, MANIFEST_VERSION)
             self.assertEqual(src.commit, TEST_COMMIT)
             self.assertTrue((src.package_root / "distribution" / "manifest.json").is_file())
             self.assertTrue((src.package_root / "core" / "policy.md").is_file())
@@ -131,7 +134,7 @@ class ResolveLocalTest(unittest.TestCase):
     def test_resolve_local_with_explicit_commit(self) -> None:
         src = resolve_local(PACKAGE_ROOT, commit=TEST_COMMIT)
         self.assertEqual(src.commit, TEST_COMMIT)
-        self.assertEqual(src.version, "v3.0.0")
+        self.assertEqual(src.version, MANIFEST_VERSION)
         self.assertEqual(src.repository, "OasisSaber/TheMasterplan")
 
     def test_resolve_local_rejects_bad_commit(self) -> None:
