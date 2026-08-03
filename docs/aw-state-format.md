@@ -21,7 +21,7 @@
   "schema_version": 1,
   "source": {
     "repository": "OasisSaber/TheMasterplan",
-    "version": "v3.0.0",
+    "version": "<distribution-version，如 v3.1.0>",
     "commit": "<full-sha>"
   },
   "selection": {
