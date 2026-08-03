@@ -114,7 +114,9 @@ class AoAdapterTests(unittest.TestCase):
     def test_adapter_forbids_merge_release_deploy(self):
         for term in ("merge", "release", "deploy"):
             self.assertIn(term, self.adapter)
-        self.assertIn("不得自动", self.adapter)
+        self.assertIn("不得自动 merge", self.adapter)
+        self.assertIn("auto: true", self.adapter)
+        self.assertIn("无效", self.adapter)
 
     def test_example_approved_and_green_not_auto(self):
         reaction = self.example["projects"]["my-project"]["reactions"][
@@ -154,6 +156,15 @@ class LoadOrderTests(unittest.TestCase):
         self.assertEqual(
             missing, [], f"load order files missing: {missing}"
         )
+
+    def test_opencode_skill_declares_same_load_order(self):
+        body = OPENCODE_SKILL.read_text(encoding="utf-8")
+        declared = [
+            line.split(". ", 1)[1].strip()
+            for line in body.splitlines()
+            if re.match(r"^\d+\. \S+", line.strip())
+        ]
+        self.assertEqual(declared, list(LOAD_ORDER_FILES))
 
 
 if __name__ == "__main__":

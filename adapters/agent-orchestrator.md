@@ -63,8 +63,9 @@ Issue assigned
 
 采用项目启用 Agent Orchestrator 时：
 
-1. 在 AO 项目配置中按 `examples/agent-orchestrator.yaml` 设置
-   `defaults.agent: opencode`、`defaults.workspace: worktree`；
+1. 在 AO 项目配置中按本仓库参考配置 `examples/agent-orchestrator.yaml`
+   设置 `defaults.agent: opencode`、`defaults.workspace: worktree`
+   （该文件是仓库内示例，不随分发 manifest 安装到采用项目）；
 2. 每个 Issue 只允许一个活跃 worker、一个 worktree、一个 branch、
    一个 Pull Request（`core/workflow.md` §1 单一交付责任人）；
 3. worker 启动时 OpenCode 自动发现 `.opencode/skills/themasterplan/`
