@@ -14,6 +14,7 @@ TheMasterplan 是面向个人开发者的“单一交付责任人的 AI 辅助�
 | 人类入口 | [README.md](README.md) |
 | 维护入口 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
+| Agent Orchestrator 集成 | [docs/agent-orchestrator-integration.md](docs/agent-orchestrator-integration.md) |
 | 完整任务生命周期 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 验证入口 | `bash scripts/check.sh` |
 | Actions 接口 | [docs/actions-interface.md](docs/actions-interface.md) |
@@ -25,6 +26,13 @@ TheMasterplan 是面向个人开发者的“单一交付责任人的 AI 辅助�
 
 - `VERIFIED`：Ubuntu GitHub Actions 中的 Bash 权威入口，以及 PowerShell 7 委托同一 Bash 入口的路径。
 - `PARTIAL`：macOS Bash 与真实 Windows PowerShell 7 + Git for Windows 环境；仓库提供入口和采用烟雾测试，但当前 CI 不在这些原生平台运行。
+
+Agent Orchestrator 支持矩阵（v3.1.0）：
+
+- `VERIFIED`：Agent Orchestrator + OpenCode + Git worktree
+- `PARTIAL`：Agent Orchestrator + OpenCode + Jujutsu colocated workspace；未完成真实 smoke 的 Windows/macOS 原生环境
+
+正式声明 `VERIFIED` 以完成独立低风险仓库的真实 smoke（阶段 G）为前提；集成说明见 [docs/agent-orchestrator-integration.md](docs/agent-orchestrator-integration.md)。
 - Jujutsu：本文档命令已使用 `0.43.0` 核对；更高版本不是自动验证范围，采用时必须重新运行烟雾测试。
 - Git：文档假设 `2.34.0` 或更高版本。
 - 示例默认远端为 `origin`、受保护分支为 `main`。

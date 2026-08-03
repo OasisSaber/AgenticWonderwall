@@ -95,6 +95,23 @@ AW 中央仓库负责工作流治理、PR 合规检查、安全基线、调用�
 profiles/git.md”）。
 
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
+
+### Agent Orchestrator 采用
+
+使用 Agent Orchestrator + OpenCode 的采用项目，在最小采用集合基础上追加：
+
+- `adapters/agent-orchestrator.md`（AO 术语映射与自动化边界，随分发 manifest
+  安装）；
+- `.opencode/skills/themasterplan/SKILL.md` 与
+  `.opencode/commands/themasterplan.md`（OpenCode 自动发现与 `/themasterplan`
+  命令入口，薄加载器，不复制 Core 正文）；
+- AO 项目配置：`defaults.agent: opencode`、`defaults.workspace: worktree`；
+  `approved-and-green` 保持 `auto: false`（只通知，不自动 merge）；
+  `ci-failed` 与 `changes-requested` 可回传原 worker。
+
+完整安装、配置、故障排查、卸载与真实 smoke 清单见
+[agent-orchestrator-integration.md](agent-orchestrator-integration.md)。
+Jujutsu 路径在完成独立真实 smoke 前保持 `PARTIAL`。
 ## 新项目
 
 1. 使用 GitHub Template Repository 创建项目。模板仅提供仓库文件；本地 Jujutsu 工作区必须自行初始化。
