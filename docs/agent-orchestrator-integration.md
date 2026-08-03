@@ -8,7 +8,7 @@
 
 | 平台组合 | 状态 | 说明 |
 |---|---|---|
-| Agent Orchestrator + OpenCode + Git worktree | `VERIFIED` | v3.1.0 正式支持路径；采用时必须在目标环境完成一次真实 smoke |
+| Agent Orchestrator + OpenCode + Git worktree | `VERIFIED*` | v3.1.0 正式支持路径；*以完成阶段 G 真实 smoke 为前提，采用时必须在目标环境完成一次真实 smoke |
 | Agent Orchestrator + OpenCode + Jujutsu colocated workspace | `PARTIAL` | 未完成独立真实 smoke 前不宣称已验证 |
 | Windows / macOS 原生环境 | `PARTIAL` | 未完成真实 smoke 前不宣称已验证（Ubuntu GitHub Actions 为 `VERIFIED`） |
 
@@ -96,7 +96,7 @@ CI 重试达到上限、Review 要求扩大到架构/公共接口/部署/数据�
   `bash scripts/check.sh`（Git Bash）；PowerShell 7 使用委托入口
   `pwsh -NoProfile -File scripts/check.ps1`；
 - 工作区检出导致 `scripts/*.sh` 模式位变化（100755 → 100644）时，提交前
-  恢复可执行位，否则仓库自检 Check 2 会失败。
+  恢复可执行位，否则 `validate.sh` 的 Check 2（提交模式检查）会失败。
 
 ## 故障排查
 

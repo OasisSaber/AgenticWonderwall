@@ -29,8 +29,9 @@ TheMasterplan 是面向个人开发者的“单一交付责任人的 AI 辅助�
 
 Agent Orchestrator 支持矩阵（v3.1.0）：
 
-- `VERIFIED`：Agent Orchestrator + OpenCode + Git worktree
-- `PARTIAL`：Agent Orchestrator + OpenCode + Jujutsu colocated workspace；未完成真实 smoke 的 Windows/macOS 原生环境
+- `VERIFIED*`：Agent Orchestrator + OpenCode + Git worktree（*以完成独立低风险仓库的真实 smoke，阶段 G 为前提）
+- `PARTIAL`：Agent Orchestrator + OpenCode + Jujutsu colocated workspace
+- `PARTIAL`：未完成真实 smoke 的 Windows/macOS 原生环境
 
 正式声明 `VERIFIED` 以完成独立低风险仓库的真实 smoke（阶段 G）为前提；集成说明见 [docs/agent-orchestrator-integration.md](docs/agent-orchestrator-integration.md)。
 - Jujutsu：本文档命令已使用 `0.43.0` 核对；更高版本不是自动验证范围，采用时必须重新运行烟雾测试。
