@@ -31,6 +31,7 @@ from awlib.planning import plan_adopt  # noqa: E402
 from awlib.source import read_package_file, resolve_local  # noqa: E402
 from awlib.util import safe_join, sha256_of_file, write_json_atomic  # noqa: E402
 from awlib.verify import verify  # noqa: E402
+from aw import build_parser  # noqa: E402
 
 PACKAGE_ROOT = REPO_ROOT  # AW repo root contains distribution/
 TEST_COMMIT = "a" * 40
@@ -514,6 +515,31 @@ class CliTest(unittest.TestCase):
         self.assertEqual(apply_proc.returncode, 0, apply_proc.stderr)
         verify_proc = run_aw(["verify", "--root", str(self.root)], self.root)
         self.assertEqual(verify_proc.returncode, 0, verify_proc.stderr)
+
+
+class PlanAdoptParserTest(unittest.TestCase):
+    """plan-adopt CLI must accept every adapter declared in the manifest."""
+
+    def test_plan_adopt_accepts_agent_orchestrator_adapter(self):
+        parser = build_parser()
+
+        args = parser.parse_args(
+            [
+                "plan-adopt",
+                "--source",
+                ".",
+                "--profile",
+                "git",
+                "--adapter",
+                "agent-orchestrator",
+                "--validation-path",
+                "scripts/check.sh",
+                "--output",
+                "plan.json",
+            ]
+        )
+
+        self.assertEqual(args.adapter, "agent-orchestrator")
 
 
 if __name__ == "__main__":
