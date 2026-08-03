@@ -54,8 +54,6 @@ AO 当前使用两层配置：
 ## 推荐配置
 
 ```yaml
-$schema: https://raw.githubusercontent.com/AgentWrapper/agent-orchestrator/main/schema/config.schema.json
-
 agent: opencode
 runtime: process
 workspace: worktree
@@ -87,6 +85,23 @@ reactions:
 > 完整 `agentRules`（一 Issue 一 worker/一 PR、禁止 merge/release/deploy、
 > 验证与 diff 审阅要求）以 `examples/agent-orchestrator.yaml` 为准；此处为
 > 最小示意，复制配置时使用完整版。
+
+### JSON Schema 说明
+
+当前 AO 的仓库内项目配置采用扁平格式。上游目前公开的
+`schema/config.schema.json` 仍描述旧的顶层 `projects:` 包装格式，
+与本文示例使用的扁平配置不一致。
+
+因此 `examples/agent-orchestrator.yaml` 暂不声明 `$schema`。
+配置有效性以以下内容为准：
+
+1. 当前 AO 官方配置文档；
+2. `ao start` 生成或接受的项目配置；
+3. TheMasterplan 的静态契约测试；
+4. 独立低风险仓库中的真实 AO smoke。
+
+上游发布与扁平配置一致的新 Schema 后，可在后续补丁版本中恢复
+`$schema`，并将 URL 固定到明确的 tag 或 commit SHA，不引用浮动 `main`。
 
 AO 默认 Agent 是 `claude-code`；这里显式选择 `opencode`。`worktree` 是默认、
 推荐的隔离方式。Windows 建议 `runtime: process`；macOS / Linux 通常可使用
@@ -164,7 +179,7 @@ AO 当前把 `auto-merge` 视为保留的 merge intent，并按通知路径处�
 |---|---|
 | OpenCode 不显示 Skill | 检查 `.opencode/skills/themasterplan/SKILL.md`、frontmatter 和 skill 权限 |
 | `/themasterplan` 不可用 | 检查 `.opencode/commands/themasterplan.md` 和文件名大小写 |
-| AO 配置无法解析 | 使用最新 `$schema`，执行 `ao doctor`；确认使用扁平项目配置 |
+| AO 配置无法解析 | 按当前 AO 官方配置文档核对；上游发布与扁平配置一致的新 Schema 后可恢复 `$schema`，并执行 `ao doctor` |
 | worker 报告未完整安装 | 按加载顺序补齐文件，不得跳过 |
 | 同一 Issue 出现重复 session | 使用 `opencodeIssueSessionStrategy: reuse`，人工核对归属后清理重复项 |
 | required check 不触发 | 检查业务仓库 reusable workflow 固定版本及 `policy-ref` 一致性 |

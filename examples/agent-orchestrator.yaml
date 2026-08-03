@@ -1,7 +1,10 @@
-$schema: https://raw.githubusercontent.com/AgentWrapper/agent-orchestrator/main/schema/config.schema.json
-
 # Project-local agent-orchestrator.yaml. Run `ao start` from the repository root
 # to register project identity; do not put `path` or `projectId` in this file.
+#
+# The currently published upstream JSON Schema still describes the legacy
+# top-level `projects:` wrapper, while this example follows AO's current flat
+# project-local configuration model. Therefore this example intentionally does
+# not declare `$schema`.
 agent: opencode
 runtime: process
 workspace: worktree

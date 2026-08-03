@@ -24,10 +24,6 @@ LOAD_ORDER_FILES = (
     "adapters/agent-orchestrator.md",
 )
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-AO_SCHEMA_URL = (
-    "https://raw.githubusercontent.com/AgentWrapper/"
-    "agent-orchestrator/main/schema/config.schema.json"
-)
 
 
 def read_frontmatter(path: Path) -> dict:
@@ -112,13 +108,21 @@ class AoAdapterTests(unittest.TestCase):
         self.assertIn("claude-code", self.adapter)
         self.assertIn("opencode", self.adapter)
 
-    def test_example_includes_official_schema(self):
-        self.assertEqual(self.example.get("$schema"), AO_SCHEMA_URL)
+    def test_example_does_not_reference_legacy_wrapped_schema(self):
+        self.assertNotIn(
+            "$schema",
+            self.example,
+            "flat AO project-local config must not reference the legacy "
+            "top-level projects-wrapper schema",
+        )
 
     def test_example_is_flat_local_project_config(self):
         self.assertNotIn("projects", self.example)
         for identity_key in ("path", "projectId", "storageKey", "originUrl"):
             self.assertNotIn(identity_key, self.example)
+        self.assertEqual(self.example["agent"], "opencode")
+        self.assertEqual(self.example["runtime"], "process")
+        self.assertEqual(self.example["workspace"], "worktree")
         self.assertEqual(self.example["agentRulesFile"], "AGENTS.md")
 
     def test_example_uses_opencode_process_worktree(self):
