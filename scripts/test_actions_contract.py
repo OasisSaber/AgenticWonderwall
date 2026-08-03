@@ -123,7 +123,7 @@ class ActionsContractTests(unittest.TestCase):
             for step in self.checkout_steps
             if step.get("with", {}).get("path")
         ]
-        self.assertIn(".agentic-wonderwall", paths)
+        self.assertIn(".themasterplan", paths)
 
     def test_runner_is_ubuntu_latest(self):
         self.assertEqual(self.check.get("runs-on"), "ubuntu-latest")
