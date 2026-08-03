@@ -18,6 +18,15 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 OPENCODE_SKILL = ROOT / ".opencode/skills/themasterplan/SKILL.md"
 OPENCODE_COMMAND = ROOT / ".opencode/commands/themasterplan.md"
+AO_ADAPTER = ROOT / "adapters/agent-orchestrator.md"
+AO_EXAMPLE = ROOT / "examples/agent-orchestrator.yaml"
+LOAD_ORDER_FILES = (
+    "AGENTS.md",
+    "core/workflow.md",
+    "core/policy.md",
+    "profiles/git.md",
+    "adapters/agent-orchestrator.md",
+)
 
 
 def read_frontmatter(path: Path) -> dict:
@@ -86,6 +95,65 @@ class LegacyEntryTests(unittest.TestCase):
                 pattern,
                 f"{markdown} contains the unsupported misspelled command",
             )
+
+
+class AoAdapterTests(unittest.TestCase):
+    """Plan test 5-12: AO adapter and example configuration contracts."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.adapter = AO_ADAPTER.read_text(encoding="utf-8")
+        cls.example = yaml.safe_load(AO_EXAMPLE.read_text(encoding="utf-8"))
+
+    def test_ao_adapter_exists(self):
+        self.assertTrue(AO_ADAPTER.is_file(), "AO adapter is missing")
+
+    def test_adapter_single_delivery_owner(self):
+        self.assertIn("单一交付责任人", self.adapter)
+
+    def test_adapter_forbids_merge_release_deploy(self):
+        for term in ("merge", "release", "deploy"):
+            self.assertIn(term, self.adapter)
+        self.assertIn("不得自动", self.adapter)
+
+    def test_example_approved_and_green_not_auto(self):
+        reaction = self.example["projects"]["my-project"]["reactions"][
+            "approved-and-green"
+        ]
+        self.assertFalse(reaction["auto"])
+        self.assertEqual(reaction["action"], "notify")
+
+    def test_example_uses_git_worktree(self):
+        self.assertEqual(self.example["defaults"]["workspace"], "worktree")
+
+    def test_example_uses_opencode(self):
+        self.assertEqual(self.example["defaults"]["agent"], "opencode")
+
+    def test_example_ci_failed_sends_to_agent(self):
+        reaction = self.example["projects"]["my-project"]["reactions"][
+            "ci-failed"
+        ]
+        self.assertTrue(reaction["auto"])
+        self.assertEqual(reaction["action"], "send-to-agent")
+
+    def test_example_changes_requested_sends_to_agent(self):
+        reaction = self.example["projects"]["my-project"]["reactions"][
+            "changes-requested"
+        ]
+        self.assertTrue(reaction["auto"])
+        self.assertEqual(reaction["action"], "send-to-agent")
+
+
+class LoadOrderTests(unittest.TestCase):
+    """Plan test 13: authoritative load order files are complete."""
+
+    def test_authoritative_load_order_complete(self):
+        missing = [
+            name for name in LOAD_ORDER_FILES if not (ROOT / name).is_file()
+        ]
+        self.assertEqual(
+            missing, [], f"load order files missing: {missing}"
+        )
 
 
 if __name__ == "__main__":

@@ -13,7 +13,8 @@
     ],
     "adapters": [
       "generic",
-      "trellis"
+      "trellis",
+      "agent-orchestrator"
     ]
   },
   "files": [
@@ -50,6 +51,12 @@
     {
       "source": "adapters/trellis.md",
       "destination": "adapters/trellis.md",
+      "ownership": "managed-replace",
+      "required": false
+    },
+    {
+      "source": "adapters/agent-orchestrator.md",
+      "destination": "adapters/agent-orchestrator.md",
       "ownership": "managed-replace",
       "required": false
     },

@@ -1,0 +1,50 @@
+defaults:
+  agent: opencode
+  runtime: process
+  workspace: worktree
+
+projects:
+  my-project:
+    path: "D:/Projects/my-project"
+    repo: OasisSaber/my-project
+    defaultBranch: main
+
+    agentRules: |
+      Follow TheMasterplan for every task.
+
+      Before making changes, read:
+      - AGENTS.md
+      - core/workflow.md
+      - core/policy.md
+      - profiles/git.md
+      - adapters/agent-orchestrator.md
+
+      Each Agent Orchestrator session owns exactly one Issue, one worktree,
+      one task branch, and one Pull Request.
+
+      The worker may implement, test, push its task branch, create or update
+      its own Pull Request, and address CI or review feedback within scope.
+
+      The worker must not merge, release, deploy, delete remote resources,
+      force-push published history, modify unrelated tasks, or expand scope
+      without explicit human approval.
+
+      Run the authoritative validation before every push.
+      Read the complete diff before creating or updating the Pull Request.
+      Report failed or unexecuted validation truthfully.
+
+    opencodeIssueSessionStrategy: reuse
+
+    reactions:
+      ci-failed:
+        auto: true
+        action: send-to-agent
+        retries: 2
+
+      changes-requested:
+        auto: true
+        action: send-to-agent
+
+      approved-and-green:
+        auto: false
+        action: notify
