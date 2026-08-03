@@ -49,6 +49,11 @@ class OpenCodeSkillTests(unittest.TestCase):
         self.assertTrue(
             OPENCODE_COMMAND.is_file(), "OpenCode command is missing"
         )
+        self.assertIn(
+            "description",
+            read_frontmatter(OPENCODE_COMMAND),
+            "OpenCode command frontmatter must be valid",
+        )
 
     def test_opencode_command_loads_skill(self):
         body = OPENCODE_COMMAND.read_text(encoding="utf-8").lower()
