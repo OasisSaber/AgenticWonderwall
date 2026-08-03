@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .source import _resolve_tag_commit
-from .util import AwError, read_json
+from .util import AwError, read_json, write_json_atomic
 
 CACHE_TTL_SECONDS = 6 * 60 * 60
 CACHE_FILE_NAME = "update-check.json"
@@ -240,6 +240,9 @@ def _read_cache(
         or FULL_SHA_RE.fullmatch(latest["commit"]) is None
     ):
         return None
+    for optional in ("release_url", "published_at"):
+        if optional in latest and not isinstance(latest[optional], str):
+            return None
     return latest
 
 
@@ -254,17 +257,14 @@ def _write_cache(
     try:
         path = _cache_file(project_root)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(
-                {
-                    "checked_at": time.time(),
-                    "repository": repository,
-                    "include_prerelease": include_prerelease,
-                    "latest": latest,
-                },
-                ensure_ascii=False,
-            ),
-            encoding="utf-8",
+        write_json_atomic(
+            path,
+            {
+                "checked_at": time.time(),
+                "repository": repository,
+                "include_prerelease": include_prerelease,
+                "latest": latest,
+            },
         )
     except OSError:
         pass
