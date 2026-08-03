@@ -19,6 +19,11 @@ from awlib.inspect import inspect
 from awlib.planning import plan_adopt
 from awlib.source import resolve_source
 from awlib.update import apply_update, plan_update
+from awlib.update_check import (
+    REPOSITORY_RE,
+    UpdateCheckError,
+    check_update,
+)
 from awlib.util import read_json, write_json_atomic
 from awlib.verify import verify
 
@@ -108,6 +113,32 @@ def _cmd_doctor(args: argparse.Namespace) -> int:
     return 0 if result["ok"] else 1
 
 
+def _cmd_check_update(args: argparse.Namespace) -> int:
+    if (
+        args.repository is not None
+        and REPOSITORY_RE.fullmatch(args.repository) is None
+    ):
+        print(
+            "themasterplan: error: --repository must be owner/repo",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        result = check_update(
+            Path(args.root),
+            repository=args.repository,
+            include_prerelease=args.include_prerelease,
+            use_cache=not args.no_cache,
+        )
+    except UpdateCheckError as exc:
+        print(f"themasterplan: error: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if result["status"] == "UNAVAILABLE":
+        return 3
+    return 0
+
+
 def _add_source_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--source",
@@ -189,6 +220,23 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser = commands.add_parser("doctor")
     doctor_parser.add_argument("--root", default=".")
     doctor_parser.set_defaults(func=_cmd_doctor)
+
+    check_update_parser = commands.add_parser("check-update")
+    check_update_parser.add_argument("--root", default=".")
+    check_update_parser.add_argument("--repository", default=None)
+    check_update_parser.add_argument(
+        "--include-prerelease",
+        action="store_true",
+    )
+    check_update_parser.add_argument(
+        "--no-cache",
+        action="store_true",
+    )
+    check_update_parser.add_argument(
+        "--json",
+        action="store_true",
+    )
+    check_update_parser.set_defaults(func=_cmd_check_update)
 
     return parser
 

@@ -129,6 +129,10 @@ adapters/agent-orchestrator.md
 
 缺失任一文件时报告“TheMasterplan 未完整安装”并停止。
 
+加载完成后执行 canonical Skill 的更新检测步骤（`check-update`）：检测到
+更新时等待用户选择，不得自动生成或应用升级；`UNAVAILABLE` 只提示，不阻断
+任务。流程见 [client-update-flow.md](client-update-flow.md)。
+
 ## 任务与责任边界
 
 一个 Issue 只对应：

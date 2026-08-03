@@ -58,6 +58,13 @@
 - `adoption`：采用日期、平台与工具版本、生产状态（`READY` / `PARTIAL` /
   `BLOCKED`）。
 
+### `.aw/cache/update-check.json`
+
+`check-update` 的可删除缓存（v3.1.1 起）：记录最近一次成功查询的
+repository、最新稳定版本与提交 SHA、检查时间；默认 6 小时 TTL，不随 Git
+提交，不含 Token。缓存损坏或过期时忽略并重新查询；写入失败不影响检测
+结果；删除无影响。见 [client-update-flow.md](client-update-flow.md)。
+
 ## 文件所有权模型
 
 | 类型 | 语义 |

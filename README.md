@@ -15,6 +15,7 @@ TheMasterplan 是面向个人开发者的“单一交付责任人的 AI 辅助�
 | 维护入口 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 采用指南 | [docs/adoption-guide.md](docs/adoption-guide.md) |
 | Agent Orchestrator 集成 | [docs/agent-orchestrator-integration.md](docs/agent-orchestrator-integration.md) |
+| 更新检测与升级流程 | [docs/client-update-flow.md](docs/client-update-flow.md) |
 | 完整任务生命周期 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 验证入口 | `bash scripts/check.sh` |
 | Actions 接口 | [docs/actions-interface.md](docs/actions-interface.md) |
