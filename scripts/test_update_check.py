@@ -243,6 +243,33 @@ class UpdateCheckHttpTests(unittest.TestCase):
             self._unpatch_urls()
         self.assertEqual(before, after)
 
+    def test_tag_resolve_failure_is_unavailable(self) -> None:
+        self._set_releases(
+            [
+                {
+                    "tag_name": "v9.9.9",
+                    "html_url": "https://example.com/releases/v9.9.9",
+                    "published_at": "2026-08-04T04:00:00Z",
+                    "prerelease": False,
+                    "draft": False,
+                }
+            ]
+        )
+        self._patch_urls()
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / ".aw").mkdir(parents=True)
+                (root / ".aw/state.json").write_text(
+                    json.dumps(STATE_JSON), encoding="utf-8"
+                )
+                result = check_update(root, use_cache=False)
+        finally:
+            self._unpatch_urls()
+            self._set_releases(RELEASES_PAYLOAD)
+        self.assertEqual(result["status"], "UNAVAILABLE")
+        self.assertIn("cannot resolve tag", result["reason"])
+
 
 class RateLimitHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):  # noqa: N802
@@ -470,6 +497,108 @@ class UpdateCheckContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("policy-ref", workflow)
+
+
+class UpdateCheckCacheTests(unittest.TestCase):
+    """Cache keying, TTL and corruption robustness."""
+
+    def _root(self) -> Path:
+        tmp = tempfile.mkdtemp(prefix="aw-cache-test-")
+        root = Path(tmp)
+        (root / ".aw").mkdir(parents=True)
+        (root / ".aw/state.json").write_text(
+            json.dumps(STATE_JSON), encoding="utf-8"
+        )
+        return root
+
+    def test_cache_is_keyed_by_prerelease_flag(self) -> None:
+        import awlib.update_check as check_mod
+
+        root = self._root()
+        latest = {"version": "v3.2.0", "commit": PRE_SHA}
+        check_mod._write_cache(
+            root, "OasisSaber/TheMasterplan", latest,
+            include_prerelease=True,
+        )
+        default_read = check_mod._read_cache(
+            root, "OasisSaber/TheMasterplan", include_prerelease=False
+        )
+        prerelease_read = check_mod._read_cache(
+            root, "OasisSaber/TheMasterplan", include_prerelease=True
+        )
+        self.assertIsNone(default_read)
+        self.assertEqual(prerelease_read, latest)
+
+    def test_expired_cache_is_ignored(self) -> None:
+        import awlib.update_check as check_mod
+
+        root = self._root()
+        cache_path = root / ".aw/cache/update-check.json"
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(
+            json.dumps(
+                {
+                    "checked_at": 0.0,
+                    "repository": "OasisSaber/TheMasterplan",
+                    "include_prerelease": False,
+                    "latest": {"version": "v3.1.1", "commit": NEXT_SHA},
+                }
+            ),
+            encoding="utf-8",
+        )
+        cached = check_mod._read_cache(
+            root, "OasisSaber/TheMasterplan", include_prerelease=False
+        )
+        self.assertIsNone(cached)
+
+    def test_corrupted_cache_is_ignored(self) -> None:
+        import awlib.update_check as check_mod
+
+        root = self._root()
+        cache_path = root / ".aw/cache/update-check.json"
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text("{not json", encoding="utf-8")
+        cached = check_mod._read_cache(
+            root, "OasisSaber/TheMasterplan", include_prerelease=False
+        )
+        self.assertIsNone(cached)
+
+
+class UpdateCheckCliTests(unittest.TestCase):
+    """CLI exit codes 2 and 3."""
+
+    def test_invalid_repository_exits_2(self) -> None:
+        import argparse
+
+        from aw import _cmd_check_update
+
+        args = argparse.Namespace(
+            root=".", repository="not-a-repo", include_prerelease=False,
+            no_cache=False,
+        )
+        self.assertEqual(_cmd_check_update(args), 2)
+
+    def test_unavailable_exits_3(self) -> None:
+        import argparse
+        from unittest import mock
+
+        from aw import _cmd_check_update
+
+        args = argparse.Namespace(
+            root=".", repository=None, include_prerelease=False,
+            no_cache=False,
+        )
+        result = {
+            "schema_version": 1,
+            "status": "UNAVAILABLE",
+            "current": None,
+            "latest": None,
+            "reason": "offline",
+            "recommended_next_step": "continue-current-version",
+            "writes_performed": False,
+        }
+        with mock.patch("aw.check_update", return_value=result):
+            self.assertEqual(_cmd_check_update(args), 3)
 
 
 if __name__ == "__main__":

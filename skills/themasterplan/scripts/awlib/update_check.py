@@ -176,7 +176,12 @@ def fetch_latest_stable_release(
     if picked is None:
         raise UpdateCheckError("no stable release found for repository")
     version = picked["tag_name"]
-    commit = _resolve_tag_commit(repository, version, timeout=timeout)
+    try:
+        commit = _resolve_tag_commit(repository, version, timeout=timeout)
+    except AwError as exc:
+        raise UpdateCheckError(
+            f"cannot resolve tag {version} to a commit SHA"
+        ) from exc
     return ReleaseIdentity(
         repository=repository,
         version=version,
@@ -205,7 +210,9 @@ def _cache_file(project_root: Path) -> Path:
     return project_root / ".aw/cache" / CACHE_FILE_NAME
 
 
-def _read_cache(project_root: Path, repository: str) -> dict | None:
+def _read_cache(
+    project_root: Path, repository: str, *, include_prerelease: bool
+) -> dict | None:
     path = _cache_file(project_root)
     if not path.is_file():
         return None
@@ -216,6 +223,8 @@ def _read_cache(project_root: Path, repository: str) -> dict | None:
     if not isinstance(data, dict):
         return None
     if data.get("repository") != repository:
+        return None
+    if bool(data.get("include_prerelease")) != include_prerelease:
         return None
     checked_at = data.get("checked_at")
     if not isinstance(checked_at, (int, float)):
@@ -234,7 +243,13 @@ def _read_cache(project_root: Path, repository: str) -> dict | None:
     return latest
 
 
-def _write_cache(project_root: Path, repository: str, latest: dict) -> None:
+def _write_cache(
+    project_root: Path,
+    repository: str,
+    latest: dict,
+    *,
+    include_prerelease: bool,
+) -> None:
     """Best-effort cache write; failures never block the detection result."""
     try:
         path = _cache_file(project_root)
@@ -244,6 +259,7 @@ def _write_cache(project_root: Path, repository: str, latest: dict) -> None:
                 {
                     "checked_at": time.time(),
                     "repository": repository,
+                    "include_prerelease": include_prerelease,
                     "latest": latest,
                 },
                 ensure_ascii=False,
@@ -282,7 +298,9 @@ def check_update(
     latest: dict | None = None
     used_cache = False
     if use_cache:
-        cached = _read_cache(project_root, query_repository)
+        cached = _read_cache(
+            project_root, query_repository, include_prerelease=include_prerelease
+        )
         if cached is not None:
             latest = cached
             used_cache = True
@@ -319,7 +337,12 @@ def check_update(
         if release.draft:
             latest["draft"] = True
         if use_cache:
-            _write_cache(project_root, query_repository, latest)
+            _write_cache(
+                project_root,
+                query_repository,
+                latest,
+                include_prerelease=include_prerelease,
+            )
 
     status = compare_versions(current.version, latest["version"])
     recommended = (
