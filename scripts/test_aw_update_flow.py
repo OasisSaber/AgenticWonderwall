@@ -21,7 +21,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXECUTOR_DIR = REPO_ROOT / "skills" / "agentic-wonderwall" / "scripts"
+EXECUTOR_DIR = REPO_ROOT / "skills" / "themasterplan" / "scripts"
 
 sys.path.insert(0, str(EXECUTOR_DIR))
 from awlib import AwError  # noqa: E402
@@ -38,10 +38,14 @@ TEST_COMMIT = "b" * 40
 
 
 def make_package_copy() -> Path:
-    """Copy distribution/core/profiles/adapters into a temp dir; returns root."""
+    """Copy distribution/core/profiles/adapters/skills into a temp dir; returns root."""
     tmp = Path(tempfile.mkdtemp(prefix="aw-pkg-"))
-    for sub in ("distribution", "core", "profiles", "adapters"):
-        shutil.copytree(PACKAGE_ROOT / sub, tmp / sub)
+    for sub in ("distribution", "core", "profiles", "adapters", "skills"):
+        shutil.copytree(
+            PACKAGE_ROOT / sub,
+            tmp / sub,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
     return tmp
 
 
@@ -91,18 +95,26 @@ class HttpServerTest(unittest.TestCase):
 
     def test_remote_resolve_download_extract(self) -> None:
         url = f"http://127.0.0.1:{self.port}/archive.tar.gz"
+        commit_url = f"http://127.0.0.1:{self.port}/commit.json"
+        (self.tmp / "commit.json").write_text(
+            json.dumps({"sha": TEST_COMMIT}),
+            encoding="utf-8",
+        )
         with tempfile.TemporaryDirectory() as tmp:
             cache = Path(tmp) / "cache"
-            # Patch the archive URL builder to the local server.
+            # Patch the archive/tag URLs to the local server.
             from awlib import source as source_mod
 
-            original = source_mod.ARCHIVE_URL
+            original_archive = source_mod.ARCHIVE_URL
+            original_api = source_mod.API_COMMIT_URL
             source_mod.ARCHIVE_URL = url
+            source_mod.API_COMMIT_URL = commit_url
             try:
-                src = resolve_remote("OasisSaber/AgenticWonderwall", "v2.2.0", cache, commit=TEST_COMMIT)
+                src = resolve_remote("OasisSaber/TheMasterplan", "v3.0.0", cache, commit=TEST_COMMIT)
             finally:
-                source_mod.ARCHIVE_URL = original
-            self.assertEqual(src.version, "v2.2.0")
+                source_mod.ARCHIVE_URL = original_archive
+                source_mod.API_COMMIT_URL = original_api
+            self.assertEqual(src.version, "v3.0.0")
             self.assertEqual(src.commit, TEST_COMMIT)
             self.assertTrue((src.package_root / "distribution" / "manifest.json").is_file())
             self.assertTrue((src.package_root / "core" / "policy.md").is_file())
@@ -112,15 +124,15 @@ class HttpServerTest(unittest.TestCase):
     def test_remote_ref_validation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(SourceError):
-                resolve_remote("OasisSaber/AgenticWonderwall", "main", Path(tmp) / "cache")
+                resolve_remote("OasisSaber/TheMasterplan", "main", Path(tmp) / "cache")
 
 
 class ResolveLocalTest(unittest.TestCase):
     def test_resolve_local_with_explicit_commit(self) -> None:
         src = resolve_local(PACKAGE_ROOT, commit=TEST_COMMIT)
         self.assertEqual(src.commit, TEST_COMMIT)
-        self.assertEqual(src.version, "v2.2.0")
-        self.assertEqual(src.repository, "OasisSaber/AgenticWonderwall")
+        self.assertEqual(src.version, "v3.0.0")
+        self.assertEqual(src.repository, "OasisSaber/TheMasterplan")
 
     def test_resolve_local_rejects_bad_commit(self) -> None:
         with self.assertRaises(SourceError):

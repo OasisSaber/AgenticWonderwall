@@ -1,6 +1,6 @@
 # Jujutsu change 与 bookmark 生命周期
 
-本文件是采用 AgenticWonderwall 工作流的项目中 jj 命令的完整生命周期。
+本文件是采用 TheMasterplan 工作流的项目中 jj 命令的完整生命周期。
 命令已在 Jujutsu `0.43.0` 上核对；更高版本必须在采用时重新完成烟雾测试。
 文档假设默认分支为 `main`、远端为 `origin`；采用项目使用其他名称时应一致替换。
 

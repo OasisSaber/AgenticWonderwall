@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""TheMasterplan deterministic executor.
+
+``aw.py`` and ``.aw`` remain stable compatibility interfaces during the
+AgenticWonderwall -> TheMasterplan rename.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from awlib import AwError
+from awlib.apply import apply_adopt
+from awlib.doctor import doctor
+from awlib.inspect import inspect
+from awlib.planning import plan_adopt
+from awlib.source import resolve_source
+from awlib.update import apply_update, plan_update
+from awlib.util import read_json, write_json_atomic
+from awlib.verify import verify
+
+
+def _cache_dir(root: Path) -> Path:
+    return root / ".aw/cache"
+
+
+def _resolve(args: argparse.Namespace, root: Path):
+    return resolve_source(
+        args.source,
+        _cache_dir(root),
+        commit=args.commit,
+        expected_repository=args.repository or None,
+    )
+
+
+def _cmd_inspect(args: argparse.Namespace) -> int:
+    result = inspect(Path(args.root), target_version=args.target)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result["status"] in (
+        "CURRENT",
+        "ABSENT",
+        "INCOMPLETE",
+        "OUTDATED",
+    ) else 1
+
+
+def _cmd_plan_adopt(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    source = _resolve(args, root)
+    plan = plan_adopt(
+        root,
+        source,
+        profile=args.profile,
+        adapter=args.adapter,
+        validation_path=args.validation_path,
+        default_branch=args.default_branch,
+        validation_path_exists=args.validation_path_exists,
+    )
+    write_json_atomic(Path(args.output), plan)
+    print(json.dumps(plan, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_apply_adopt(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    result = apply_adopt(
+        root,
+        Path(args.plan),
+        _resolve(args, root),
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_plan_update(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    source = _resolve(args, root)
+    state = read_json(root / ".aw/state.json")
+    plan = plan_update(root, source, state)
+    write_json_atomic(Path(args.output), plan)
+    print(json.dumps(plan, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_apply_update(args: argparse.Namespace) -> int:
+    root = Path(args.root)
+    result = apply_update(
+        root,
+        Path(args.plan),
+        _resolve(args, root),
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_verify(args: argparse.Namespace) -> int:
+    result = verify(Path(args.root))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result["ok"] else 1
+
+
+def _cmd_doctor(args: argparse.Namespace) -> int:
+    result = doctor(Path(args.root))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result["ok"] else 1
+
+
+def _add_source_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--source",
+        required=True,
+        help="local path, release tag, or full commit SHA",
+    )
+    parser.add_argument(
+        "--commit",
+        default=None,
+        help="expected full SHA; tag values are verified against GitHub",
+    )
+    parser.add_argument(
+        "--repository",
+        default=None,
+        help="expected owner/repo; defaults to OasisSaber/TheMasterplan",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="aw.py",
+        description=__doc__,
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    inspect_parser = commands.add_parser("inspect")
+    inspect_parser.add_argument("--root", default=".")
+    inspect_parser.add_argument("--target", default=None)
+    inspect_parser.set_defaults(func=_cmd_inspect)
+
+    plan_adopt_parser = commands.add_parser("plan-adopt")
+    plan_adopt_parser.add_argument("--root", default=".")
+    _add_source_args(plan_adopt_parser)
+    plan_adopt_parser.add_argument(
+        "--profile",
+        required=True,
+        choices=["git", "jj"],
+    )
+    plan_adopt_parser.add_argument(
+        "--adapter",
+        required=True,
+        choices=["generic", "trellis"],
+    )
+    plan_adopt_parser.add_argument("--validation-path", required=True)
+    plan_adopt_parser.add_argument("--default-branch", default="main")
+    plan_adopt_parser.add_argument(
+        "--validation-path-exists",
+        action="store_true",
+    )
+    plan_adopt_parser.add_argument("--output", required=True)
+    plan_adopt_parser.set_defaults(func=_cmd_plan_adopt)
+
+    apply_adopt_parser = commands.add_parser("apply-adopt")
+    apply_adopt_parser.add_argument("--root", default=".")
+    apply_adopt_parser.add_argument("--plan", required=True)
+    _add_source_args(apply_adopt_parser)
+    apply_adopt_parser.set_defaults(func=_cmd_apply_adopt)
+
+    plan_update_parser = commands.add_parser("plan-update")
+    plan_update_parser.add_argument("--root", default=".")
+    _add_source_args(plan_update_parser)
+    plan_update_parser.add_argument("--output", required=True)
+    plan_update_parser.set_defaults(func=_cmd_plan_update)
+
+    apply_update_parser = commands.add_parser("apply-update")
+    apply_update_parser.add_argument("--root", default=".")
+    apply_update_parser.add_argument("--plan", required=True)
+    _add_source_args(apply_update_parser)
+    apply_update_parser.set_defaults(func=_cmd_apply_update)
+
+    verify_parser = commands.add_parser("verify")
+    verify_parser.add_argument("--root", default=".")
+    verify_parser.set_defaults(func=_cmd_verify)
+
+    doctor_parser = commands.add_parser("doctor")
+    doctor_parser.add_argument("--root", default=".")
+    doctor_parser.set_defaults(func=_cmd_doctor)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return args.func(args)
+    except AwError as exc:
+        print(f"themasterplan: error: {exc}", file=sys.stderr)
+        return 2
+    except KeyboardInterrupt:
+        return 130
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

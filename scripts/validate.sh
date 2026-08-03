@@ -1,5 +1,5 @@
 #!/bin/bash
-# Technical validation for AgenticWonderwall.
+# Technical validation for TheMasterplan.
 #
 # Verifies exactly four checks:
 #   1. Internal Markdown links and anchors

@@ -1,6 +1,6 @@
 # Core Workflow：任务与验证
 
-> 本文件是 AgenticWonderwall 工作流中"任务来源、工作区卫生、验证真实性与
+> 本文件是 TheMasterplan 工作流中"任务来源、工作区卫生、验证真实性与
 > 交付自审"的权威规则来源。根部 `AGENTS.md` 引用本文件；`core/policy.md`
 > 规定授权与发布；`profiles/` 规定具体工具（Git / jj）命令；
 > `adapters/` 规定 Harness 映射。各层通过链接引用，不复制同一规则。

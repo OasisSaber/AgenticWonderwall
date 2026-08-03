@@ -1,4 +1,4 @@
-name: AgenticWonderwall Check
+name: TheMasterplan Check
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ on:
         default: scripts/check.sh
 
       policy-ref:
-        description: AgenticWonderwall ref used for policy implementation
+        description: TheMasterplan ref used for policy implementation
         required: false
         type: string
         default: v1
@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Checkout AgenticWonderwall policy
+      - name: Checkout TheMasterplan policy
         if: github.repository != 'OasisSaber/AgenticWonderwall'
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -103,7 +103,7 @@ jobs:
           POLICY_REF: ${{ inputs.policy-ref }}
         run: |
           {
-            echo "## AgenticWonderwall"
+            echo "## TheMasterplan"
             echo
             echo "- Caller: \`$GITHUB_REPOSITORY\`"
             echo "- Policy ref: \`$POLICY_REF\`"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mechanically validate the AgenticWonderwall pull request template."""
+"""Mechanically validate the TheMasterplan pull request template."""
 
 import os
 import re

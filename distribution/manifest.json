@@ -1,14 +1,20 @@
 {
   "schema_version": 1,
-  "distribution_version": "v2.2.0",
-  "source_repository": "OasisSaber/AgenticWonderwall",
+  "distribution_version": "v3.0.0",
+  "source_repository": "OasisSaber/TheMasterplan",
   "required": [
     "core/workflow.md",
     "core/policy.md"
   ],
   "components": {
-    "profiles": ["git", "jj"],
-    "adapters": ["generic", "trellis"]
+    "profiles": [
+      "git",
+      "jj"
+    ],
+    "adapters": [
+      "generic",
+      "trellis"
+    ]
   },
   "files": [
     {

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Unit and temp-repo integration tests for the /aw executor (PR A).
+"""Unit and temp-repo integration tests for the /TheMasterplan executor (PR A).
 
-Loads ``skills/agentic-wonderwall/scripts/awlib`` via importlib and drives
+Loads ``skills/themasterplan/scripts/awlib`` via importlib and drives
 the real executor against temporary directories; the AW repository's own
 ``distribution/`` package is used as the fixture source.
 
@@ -20,7 +20,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXECUTOR_DIR = REPO_ROOT / "skills" / "agentic-wonderwall" / "scripts"
+EXECUTOR_DIR = REPO_ROOT / "skills" / "themasterplan" / "scripts"
 
 sys.path.insert(0, str(EXECUTOR_DIR))
 from awlib import AwError, PathSafetyError  # noqa: E402
@@ -43,7 +43,7 @@ class _SourceMixin:
 
 STATE_JSON = {
     "schema_version": 1,
-    "source": {"repository": "OasisSaber/AgenticWonderwall", "version": "v2.2.0", "commit": "a" * 40},
+    "source": {"repository": "OasisSaber/TheMasterplan", "version": "v3.0.0", "commit": "a" * 40},
     "selection": {"profile": "jj", "adapter": "trellis", "validation_path": "scripts/check.sh", "default_branch": "main"},
     "managed_files": {},
     "adoption": {"date": "2026-08-02", "platform": "linux", "git_version": "2.40", "jj_version": "0.43", "status": "PARTIAL"},
@@ -103,8 +103,8 @@ class ManifestTest(unittest.TestCase):
             path = Path(tmp) / "m.json"
             data = {
                 "schema_version": 1,
-                "distribution_version": "v1",
-                "source_commit": "a" * 40,
+                "distribution_version": "v1.0.0",
+                "source_repository": "OasisSaber/TheMasterplan",
                 "files": [
                     {"source": "x", "destination": "dup", "ownership": "managed-replace"},
                     {"source": "y", "destination": "dup", "ownership": "managed-replace"},
@@ -119,8 +119,8 @@ class ManifestTest(unittest.TestCase):
             path = Path(tmp) / "m.json"
             data = {
                 "schema_version": 1,
-                "distribution_version": "v1",
-                "source_commit": "a" * 40,
+                "distribution_version": "v1.0.0",
+                "source_repository": "OasisSaber/TheMasterplan",
                 "files": [{"source": "x", "destination": "../evil", "ownership": "managed-replace"}],
             }
             write_json_atomic(path, data)
@@ -277,7 +277,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         self.assertEqual(applied2["unchanged"], applied["written"])
 
         # inspect now reports CURRENT
-        status, issues = detect_status(self.root, target_version="v2.2.0")
+        status, issues = detect_status(self.root, target_version="v3.0.0")
         self.assertEqual(status, "CURRENT", issues)
 
     def test_existing_agents_block_preserved_and_replaced(self) -> None:
@@ -294,7 +294,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         text = (self.root / "AGENTS.md").read_text(encoding="utf-8")
         self.assertTrue(text.startswith("PROJECT HEADER"))
         self.assertTrue(text.rstrip("\n").endswith("PROJECT FOOTER"))
-        self.assertIn("# AgenticWonderwall", text)
+        self.assertIn("# TheMasterplan", text)
         self.assertNotIn("old block", text)
 
     def test_agents_block_missing_stops(self) -> None:
@@ -334,7 +334,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         """The resolver must reject a commit that is not a full 40-char SHA."""
         with self.assertRaises(Exception) as ctx:
             resolve_local(PACKAGE_ROOT, commit="not-a-sha")
-        self.assertIn("40-char hex SHA", str(ctx.exception))
+        self.assertIn("40-char lowercase SHA", str(ctx.exception))
 
     def test_block_outside_change_keeps_current(self) -> None:
         """Editing AGENTS.md outside the managed block keeps CURRENT/verify OK."""
@@ -347,7 +347,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         # byte-level hashes of the untouched block.
         agents = self.root / "AGENTS.md"
         agents.write_bytes(agents.read_bytes() + b"\n- \xe9\xa1\xb9\xe7\x9b\xae\xe5\x90\x8d: Demo\n")
-        status, issues = detect_status(self.root, target_version="v2.2.0")
+        status, issues = detect_status(self.root, target_version="v3.0.0")
         self.assertEqual(status, "CURRENT", issues)
         report = verify(self.root)
         self.assertTrue(report["ok"], report["issues"])
@@ -361,7 +361,7 @@ class AdoptFlowTest(_SourceMixin, unittest.TestCase):
         agents = self.root / "AGENTS.md"
         data = agents.read_bytes()
         agents.write_bytes(data.replace(b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f", b"## \xe6\x9d\x83\xe5\xa8\x81\xe9\xa1\xba\xe5\xba\x8f\xef\xbc\x88\xe5\xb7\xb2\xe7\xaf\xa1\xe6\x94\xb9\xef\xbc\x89", 1))
-        status, issues = detect_status(self.root, target_version="v2.2.0")
+        status, issues = detect_status(self.root, target_version="v3.0.0")
         self.assertEqual(status, "MODIFIED", issues)
         report = verify(self.root)
         self.assertFalse(report["ok"], "verify must fail when block is modified")

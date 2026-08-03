@@ -1,8 +1,8 @@
 <!-- AW:BEGIN MANAGED -->
-<!-- 本区块由 AgenticWonderwall（/aw）管理（managed-block）。
+<!-- 本区块由 TheMasterplan（/TheMasterplan）管理（managed-block）。
      区块外内容属于项目，AW 不会覆盖；项目事实请维护在区块外。 -->
 
-# AgenticWonderwall
+# TheMasterplan
 
 > 本文件是本仓库唯一入口：定义加载顺序与分域权威，不复制规则正文。
 > 规则分布：

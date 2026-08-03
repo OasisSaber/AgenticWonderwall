@@ -1,6 +1,6 @@
 # 采用与烟雾测试清单
 
-采用 AgenticWonderwall 工作流的项目应在部署本 skill 后完成以下工作。记录实际
+采用 TheMasterplan 工作流的项目应在部署本 skill 后完成以下工作。记录实际
 使用的来源版本（Release tag 或完整 commit SHA），不得因为示例而声称采用了
 未实际使用的版本。
 
@@ -68,7 +68,7 @@
 ## 版本记录模板
 
 ```markdown
-来源: AgenticWonderwall <release-tag-or-full-commit-sha>
+来源: TheMasterplan <release-tag-or-full-commit-sha>
 采用范围: <完整模板 / 最小采用集合（AGENTS.md + core/ + profiles/…）/ 自定义文件集合>
 采用日期: <YYYY-MM-DD>
 首次演练任务: Issue #<number> / <human authorization reference>

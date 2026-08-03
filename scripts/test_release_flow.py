@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real Git tag-only release-flow tests for the AgenticWonderwall Git Profile.
+"""Real Git tag-only release-flow tests for the TheMasterplan Git Profile.
 
 Runs the tag-only release transaction described in profiles/git.md against
 real, temporary Git repositories (work repo + bare upstream as origin) to

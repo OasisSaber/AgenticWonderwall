@@ -1,12 +1,12 @@
 # GitHub Actions 中央接口
 
-AgenticWonderwall 提供集中维护、版本化发布的 GitHub Actions 可重用工作流。
+TheMasterplan 提供集中维护、版本化发布的 GitHub Actions 可重用工作流。
 业务仓库通过 `uses` 调用，不再复制中央 CI 实现。
 
 ## 工作流路径
 
 ```yaml
-uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
+uses: OasisSaber/TheMasterplan/.github/workflows/aw-check.yml@v1
 ```
 
 该路径在 `v1` 生命周期内不得移动或重命名。
@@ -43,7 +43,7 @@ uses: OasisSaber/AgenticWonderwall/.github/workflows/aw-check.yml@v1
 业务仓库 .github/workflows/check.yml
         │ uses @v1
         ▼
-AgenticWonderwall .github/workflows/aw-check.yml
+TheMasterplan .github/workflows/aw-check.yml
         │
         ├── 检出调用方仓库
         ├── 检出 AW 策略实现
