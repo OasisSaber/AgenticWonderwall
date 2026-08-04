@@ -117,7 +117,7 @@ class ActionsContractTests(unittest.TestCase):
         self.assertIn("project", paths)
         self.assertEqual(paths[0], "project")
 
-    def test_policy_path_is_agentic_wonderwall(self):
+    def test_policy_path_is_themasterplan(self):
         paths = [
             step.get("with", {}).get("path")
             for step in self.checkout_steps
