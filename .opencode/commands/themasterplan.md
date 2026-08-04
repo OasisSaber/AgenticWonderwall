@@ -7,6 +7,10 @@ Do not continue until the Skill confirms that every required TheMasterplan file
 is present.
 If the Skill reports a missing file, stop.
 
+加载 canonical Skill 后执行其更新检测步骤；
+检测到更新时等待用户选择；
+不得自动生成或应用升级。
+
 The required load order is:
 
 - AGENTS.md

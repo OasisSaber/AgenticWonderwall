@@ -9,6 +9,10 @@ compatibility: Requires AGENTS.md, core/, profiles/git.md, and adapters/agent-or
 Use this Skill for an Agent Orchestrator worker, or when the user invokes
 `/themasterplan` in a repository that has adopted TheMasterplan.
 
+加载 canonical Skill 后执行其更新检测步骤；
+检测到更新时等待用户选择；
+不得自动生成或应用升级。
+
 Before any write operation, verify and read these files in order:
 
 1. AGENTS.md

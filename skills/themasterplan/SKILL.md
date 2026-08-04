@@ -56,3 +56,24 @@ Agent Orchestrator + OpenCode 环境下，worker 通过
 
 缺失根部 `AGENTS.md`、`core/` 或所选 Profile 时，报告
 “TheMasterplan 未完整安装”，不得静默推断完整规则。
+
+## 更新检测
+
+加载权威规则并确认项目完整安装后：
+
+1. 若项目存在 `.aw/state.json` 与 `.aw/bin/aw.py`，运行：
+
+   ```bash
+   python .aw/bin/aw.py check-update --root . --json
+   ```
+
+2. `CURRENT`：简短说明当前已是最新稳定版本，继续任务。
+3. `UPDATE_AVAILABLE`：报告当前版本、目标版本和提交身份，明确说明
+   “本次不会自动升级”，由用户选择：
+   - 继续当前版本；
+   - 查看版本变化；
+   - 生成只读升级计划。
+4. 未经用户明确选择，不得运行 `plan-update`。
+5. 未经第二次明确批准，不得运行 `apply-update`。
+6. `UNAVAILABLE`、`UNKNOWN`、`NOT_ADOPTED` 不阻断正常任务，只如实报告。
+7. 更新检测不得替代本次任务的 Issue、授权、范围、验证和 diff 审阅要求。

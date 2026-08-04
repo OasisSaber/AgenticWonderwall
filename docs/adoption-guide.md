@@ -96,6 +96,14 @@ profiles/git.md”）。
 
 任何采用方式都应记录实际来源的 Release tag 或完整 commit SHA，不得因为文档示例而声称采用了未实际使用的版本。
 
+### 更新检测
+
+采用项目加载 `/TheMasterplan` Skill 时会只读检测当前版本与最新稳定
+Release：`CURRENT` 直接继续；`UPDATE_AVAILABLE` 报告版本与提交身份，由
+用户决定是否生成只读升级计划；`UNAVAILABLE`/`NOT_ADOPTED` 只提示，不阻断
+任务。TheMasterplan 不自动升级。检测命令、确认门、缓存与离线行为见
+[client-update-flow.md](client-update-flow.md)。
+
 ### Agent Orchestrator 采用
 
 使用 Agent Orchestrator + OpenCode 的采用项目，在最小采用集合基础上追加：
